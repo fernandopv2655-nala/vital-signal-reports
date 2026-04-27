@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Salud — F. Martínez</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #f4ede1;
+  --surface: #fbf6ec;
+  --surface-2: #efe6d5;
+  --ink: #1c1d24;
+  --ink-soft: #2d2e36;
+  --muted: #6b6256;
+  --muted-2: #8a8275;
+  --line: rgba(28, 29, 36, 0.10);
+  --line-soft: rgba(28, 29, 36, 0.06);
+  --navy: #1f3a5f;
+  --sage: #5a8a6b;
+  --sage-deep: #426650;
+  --terracotta: #b85c38;
+  --terracotta-soft: #d28a6c;
+  --gold: #c89f3c;
+  --plum: #6e3a5c;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+aside.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 32px 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+main.content {
+  padding: 48px 56px 80px;
+  max-width: 1200px;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.brand-mark {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.brand-sub {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 36px;
+  font-weight: 300;
+}
+
+.side-section { margin-bottom: 28px; }
+
+.side-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.patient-info {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.patient-info .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+}
+.patient-info .k { color: var(--muted); }
+.patient-info .v { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+.range-pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.range-pill {
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 9px 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.02em;
+}
+.range-pill:hover { background: var(--surface-2); }
+.range-pill.active { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+.date-inputs {
+  display: grid;
+  gap: 8px;
+}
+.date-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.date-input-row label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.date-input-row input {
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.date-input-row input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.range-info {
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted-2);
+  letter-spacing: 0.04em;
+}
+
+.nav { list-style: none; }
+.nav li {
+  font-size: 13px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color 0.15s ease;
+  border-left: 2px solid transparent;
+  padding-left: 10px;
+  margin-left: -10px;
+}
+.nav li:hover { color: var(--ink); }
+.nav li.current {
+  color: var(--ink);
+  border-left-color: var(--terracotta);
+  font-weight: 500;
+}
+.nav li .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted-2);
+  margin-right: 8px;
+}
+
+.side-foot {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--muted-2);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.6;
+}
+
+.hero {
+  margin-bottom: 56px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--line);
+}
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.hero-eyebrow::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: var(--terracotta);
+}
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 20px;
+  max-width: 720px;
+}
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--muted);
+}
+.hero-meta {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  flex-wrap: wrap;
+}
+.hero-meta strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 56px;
+}
+.kpi {
+  background: var(--surface);
+  padding: 22px 20px;
+  position: relative;
+}
+.kpi-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: 10px;
+}
+.kpi-value {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-unit {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 4px;
+  letter-spacing: -0.005em;
+}
+.kpi-trend {
+  margin-top: 10px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.kpi-trend.up { color: var(--sage-deep); }
+.kpi-trend.down { color: var(--terracotta); }
+.kpi-trend.flat { color: var(--muted); }
+
+.section {
+  margin-bottom: 72px;
+  scroll-margin-top: 24px;
+}
+.section-head { margin-bottom: 28px; }
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--terracotta);
+  margin-bottom: 8px;
+}
+.section h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-size: 30px;
+  letter-spacing: -0.018em;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.section h2 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--muted);
+}
+.section-lede {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 680px;
+  margin-bottom: 32px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 28px;
+  margin-bottom: 16px;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.card-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.card-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.card-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 22px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.card-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+}
+.chart-wrap.tall { height: 280px; }
+.chart-wrap.compact { height: 160px; }
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 32px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line-soft);
+}
+.stat-strip .s { text-align: left; }
+.stat-strip .s-l {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: 6px;
+}
+.stat-strip .s-v {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.stat-strip .s-u {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 3px;
+}
+
+.callout {
+  background: transparent;
+  border-left: 2px solid var(--terracotta);
+  padding: 4px 0 4px 20px;
+  margin: 18px 0 0;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 640px;
+}
+
+.methodology {
+  margin-top: 64px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+.methodology h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.methodology p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 680px;
+}
+
+.report-foot {
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+@media (max-width: 960px) {
+  .app { grid-template-columns: 1fr; }
+  aside.sidebar { position: relative; height: auto; }
+  main.content { padding: 32px 24px 60px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .card-grid-2 { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 32px; }
+}
+
+@media print {
+  body { background: white; }
+  aside.sidebar { display: none; }
+  .app { grid-template-columns: 1fr; }
+  main.content { padding: 24px; }
+  .card, .kpi { background: white; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">Vital Signal</span></div>
+    <div class="brand-sub">Reporte general de salud</div>
+
+    <div class="side-section">
+      <div class="side-label">Paciente</div>
+      <div class="patient-info">
+        <div class="row"><span class="k">Nombre</span><span class="v">F. Martínez</span></div>
+        <div class="row"><span class="k">Estatura</span><span class="v">1.69 m</span></div>
+        <div class="row"><span class="k">Peso</span><span class="v">69.7 kg</span></div>
+        <div class="row"><span class="k">IMC</span><span class="v">24.4</span></div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-label">Rango Rápido</div>
+      <div class="range-pills">
+        <button class="range-pill" data-range="30">30 días</button>
+        <button class="range-pill" data-range="90">90 días</button>
+        <button class="range-pill" data-range="180">6 meses</button>
+        <button class="range-pill active" data-range="365">12 meses</button>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-label">Rango Personalizado</div>
+      <div class="date-inputs">
+        <div class="date-input-row">
+          <label for="from-date">Desde</label>
+          <input type="date" id="from-date">
+        </div>
+        <div class="date-input-row">
+          <label for="to-date">Hasta</label>
+          <input type="date" id="to-date">
+        </div>
+      </div>
+      <div class="range-info" id="range-info">—</div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-label">Secciones</div>
+      <ul class="nav">
+        <li class="current" data-target="autonomic"><span class="num">01</span>Cardiovascular y autonómico</li>
+        <li data-target="inflammatory"><span class="num">02</span>Inflamatorio y respiratorio</li>
+        <li data-target="sleep"><span class="num">03</span>Sueño y recuperación</li>
+        <li data-target="reference"><span class="num">04</span>Tabla de referencia</li>
+      </ul>
+    </div>
+
+    <div class="side-foot">
+      Generado <span id="gendate">·</span><br>
+      Datos continuos · WHOOP 4.0
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="hero">
+      <div class="hero-eyebrow">Reporte General de Salud · Para Referencia Clínica</div>
+      <h1>Datos fisiológicos continuos <em>de un vistazo</em>.</h1>
+      <div class="hero-meta">
+        <span>Periodo <strong id="period-text">—</strong></span>
+        <span>Días monitoreados <strong id="period-days">—</strong></span>
+        <span>Fuente <strong>WHOOP 4.0</strong></span>
+      </div>
+    </header>
+
+    <div class="kpi-row" id="kpi-row"></div>
+
+    <!-- 01: CARDIOVASCULAR Y AUTONÓMICO -->
+    <section class="section" id="autonomic">
+      <div class="section-head">
+        <div class="section-num">01 / Cardiovascular y autonómico</div>
+        <h2>Recuperación y <em>balance autonómico</em>.</h2>
+        <p class="section-lede">El puntaje de recuperación compuesto integra VFC, frecuencia cardíaca en reposo, sueño y frecuencia respiratoria. La variabilidad de la frecuencia cardíaca refleja tono vagal; el índice de estrés autonómico combina ambos brazos de regulación en una sola razón. La trayectoria importa más que los valores aislados.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Puntaje de recuperación</div>
+          <div class="card-meta">Compuesto · 0–100</div>
+        </div>
+        <div class="card-sub">Compuesto diario. Verde ≥67, amarillo 33–66, rojo &lt;33.</div>
+        <div class="chart-wrap tall"><canvas id="ch-recovery" role="img" aria-label="Puntaje de recuperación en el tiempo"></canvas></div>
+        <div class="stat-strip" id="recovery-strip"></div>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">VFC — tono vagal</div>
+            <div class="card-meta">RMSSD ms</div>
+          </div>
+          <div class="card-sub">Valores más altos reflejan dominancia parasimpática.</div>
+          <div class="chart-wrap compact"><canvas id="ch-hrv" role="img" aria-label="Variabilidad de la frecuencia cardíaca"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Frecuencia cardíaca en reposo</div>
+            <div class="card-meta">lpm · nocturno</div>
+          </div>
+          <div class="card-sub">Valor nocturno estable más bajo.</div>
+          <div class="chart-wrap compact"><canvas id="ch-rhr" role="img" aria-label="Frecuencia cardíaca en reposo"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Índice de estrés autonómico</div>
+          <div class="card-meta">FCR ÷ VFC</div>
+        </div>
+        <div class="card-sub">Razón compuesta. Valores más bajos reflejan balance autonómico más favorable.</div>
+        <div class="chart-wrap"><canvas id="ch-asi" role="img" aria-label="Índice de estrés autonómico"></canvas></div>
+      </div>
+    </section>
+
+    <!-- 02: INFLAMATORIO Y RESPIRATORIO -->
+    <section class="section" id="inflammatory">
+      <div class="section-head">
+        <div class="section-num">02 / Inflamatorio y respiratorio</div>
+        <h2>Temperatura cutánea y <em>oxigenación</em>.</h2>
+        <p class="section-lede">La desviación de la temperatura cutánea respecto a una línea base móvil de 30 días puede capturar episodios de inflamación, enfermedad o disrupción circadiana. La saturación nocturna de oxígeno refleja la función respiratoria durante el sueño.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Desviación de temperatura cutánea</div>
+          <div class="card-meta">Δ de línea base 30 días</div>
+        </div>
+        <div class="card-sub">Desviaciones que exceden ±1°C resaltadas.</div>
+        <div class="chart-wrap"><canvas id="ch-skintemp" role="img" aria-label="Desviación de temperatura cutánea"></canvas></div>
+        <div class="stat-strip" id="skintemp-strip"></div>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">SpO₂ — en el tiempo</div>
+            <div class="card-meta">% nocturno</div>
+          </div>
+          <div class="card-sub">Oximetría de pulso reflectiva en muñeca; sólo monitoreo de tendencias.</div>
+          <div class="chart-wrap compact"><canvas id="ch-spo2-trend" role="img" aria-label="SpO2 en el tiempo"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">SpO₂ — distribución</div>
+            <div class="card-meta">Histograma</div>
+          </div>
+          <div class="card-sub">Distribución de todas las noches monitoreadas.</div>
+          <div class="chart-wrap compact"><canvas id="ch-spo2-dist" role="img" aria-label="Distribución de SpO2"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03: SUEÑO -->
+    <section class="section" id="sleep">
+      <div class="section-head">
+        <div class="section-num">03 / Sueño y recuperación</div>
+        <h2>Duración, <em>arquitectura</em>, regularidad.</h2>
+        <p class="section-lede">El sueño reparador — la proporción de etapas de ondas lentas y REM — apoya la consolidación inmunitaria y la recuperación. La regularidad del sueño, medida como consistencia semana a semana de la hora de despertar, es relevante de forma independiente más allá de la duración total.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Duración del sueño</div>
+          <div class="card-meta">Horas · banda objetivo 7–9</div>
+        </div>
+        <div class="chart-wrap"><canvas id="ch-sleep" role="img" aria-label="Duración del sueño en el tiempo"></canvas></div>
+        <div class="stat-strip" id="sleep-strip"></div>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Sueño reparador %</div>
+            <div class="card-meta">(Profundo + REM) ÷ total</div>
+          </div>
+          <div class="chart-wrap compact"><canvas id="ch-restorative" role="img" aria-label="Porcentaje de sueño reparador"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Regularidad del sueño</div>
+            <div class="card-meta">DE semanal de hora de despertar</div>
+          </div>
+          <div class="chart-wrap compact"><canvas id="ch-regularity" role="img" aria-label="Regularidad del sueño"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04: REFERENCIA -->
+    <section class="section" id="reference">
+      <div class="section-head">
+        <div class="section-num">04 / Referencia</div>
+        <h2>Métricas detalladas.</h2>
+      </div>
+      <div class="card">
+        <div id="ref-table"></div>
+      </div>
+    </section>
+
+    <div class="methodology">
+      <h3>Metodología y limitaciones</h3>
+      <p>Datos capturados por monitor biométrico WHOOP 4.0 en muñeca. VFC calculada mediante RMSSD durante el último periodo de sueño de ondas lentas. FC en reposo tomada como el valor nocturno estable más bajo. Índice de Estrés Autonómico = FCR ÷ VFC. Desviación de temperatura cutánea = valor diario menos línea base móvil de 30 días. Regularidad del sueño = desviación estándar semanal de la hora de despertar. % de sueño reparador = (ondas lentas + REM) ÷ duración total del sueño. SpO₂ medida por oximetría de pulso reflectiva en muñeca; menos precisa que dispositivos clínicos de dedo y no validada para diagnóstico de trastornos respiratorios del sueño. La estadificación del sueño se deriva de acelerometría y PPG, no de polisomnografía. Los valores están destinados al monitoreo de tendencias, no como sustitutos diagnósticos; la correlación con examen clínico, síntomas y estudios de laboratorio convencionales es esencial.</p>
+    </div>
+
+    <div class="report-foot">
+      <span>Vital Signal · Reporte de Salud</span>
+      <span id="foot-date">—</span>
+    </div>
+  </main>
+</div>
+
+<script id="vital-data" type="application/json">{"meta":{"patient":"Fernando Martinez","gen":"2026-04-26","start":"2025-04-25","end":"2026-04-25","days":376,"h":1.69,"w":69.65,"mhr":196,"bmi":24.4},"daily":{"d":["2025-04-25","2025-04-26","2025-04-27","2025-04-28","2025-04-29","2025-04-30","2025-05-01","2025-05-02","2025-05-03","2025-05-04","2025-05-05","2025-05-06","2025-05-07","2025-05-08","2025-05-09","2025-05-10","2025-05-11","2025-05-12","2025-05-13","2025-05-14","2025-05-15","2025-05-16","2025-05-17","2025-05-18","2025-05-19","2025-05-20","2025-05-21","2025-05-22","2025-05-23","2025-05-24","2025-05-25","2025-05-26","2025-05-27","2025-05-28","2025-05-29","2025-05-30","2025-05-31","2025-06-01","2025-06-02","2025-06-03","2025-06-04","2025-06-05","2025-06-06","2025-06-07","2025-06-08","2025-06-09","2025-06-10","2025-06-11","2025-06-12","2025-06-13","2025-06-14","2025-06-15","2025-06-16","2025-06-17","2025-06-18","2025-06-19","2025-06-20","2025-06-21","2025-06-22","2025-06-23","2025-06-24","2025-06-25","2025-06-26","2025-06-27","2025-06-28","2025-06-29","2025-06-30","2025-07-01","2025-07-02","2025-07-03","2025-07-04","2025-07-05","2025-07-06","2025-07-07","2025-07-08","2025-07-09","2025-07-10","2025-07-11","2025-07-12","2025-07-13","2025-07-14","2025-07-15","2025-07-16","2025-07-17","2025-07-18","2025-07-18","2025-07-18","2025-07-18","2025-07-19","2025-07-20","2025-07-21","2025-07-22","2025-07-23","2025-07-24","2025-07-25","2025-07-26","2025-07-26","2025-07-26","2025-07-26","2025-07-26","2025-07-26","2025-07-26","2025-07-26","2025-07-27","2025-07-28","2025-07-29","2025-07-30","2025-07-31","2025-08-01","2025-08-02","2025-08-03","2025-08-04","2025-08-05","2025-08-06","2025-08-07","2025-08-08","2025-08-09","2025-08-10","2025-08-11","2025-08-12","2025-08-13","2025-08-14","2025-08-15","2025-08-16","2025-08-17","2025-08-18","2025-08-19","2025-08-20","2025-08-21","2025-08-22","2025-08-23","2025-08-24","2025-08-25","2025-08-26","2025-08-27","2025-08-28","2025-08-29","2025-08-30","2025-08-31","2025-09-01","2025-09-02","2025-09-03","2025-09-04","2025-09-05","2025-09-06","2025-09-07","2025-09-08","2025-09-09","2025-09-10","2025-09-11","2025-09-12","2025-09-13","2025-09-14","2025-09-15","2025-09-16","2025-09-17","2025-09-18","2025-09-19","2025-09-20","2025-09-21","2025-09-22","2025-09-23","2025-09-24","2025-09-25","2025-09-26","2025-09-27","2025-09-28","2025-09-29","2025-09-30","2025-10-01","2025-10-02","2025-10-03","2025-10-04","2025-10-05","2025-10-06","2025-10-07","2025-10-08","2025-10-09","2025-10-10","2025-10-11","2025-10-12","2025-10-13","2025-10-14","2025-10-15","2025-10-16","2025-10-17","2025-10-18","2025-10-19","2025-10-20","2025-10-21","2025-10-22","2025-10-23","2025-10-24","2025-10-25","2025-10-26","2025-10-27","2025-10-28","2025-10-29","2025-10-30","2025-10-31","2025-11-01","2025-11-02","2025-11-03","2025-11-04","2025-11-05","2025-11-06","2025-11-07","2025-11-08","2025-11-09","2025-11-10","2025-11-11","2025-11-12","2025-11-13","2025-11-14","2025-11-15","2025-11-16","2025-11-17","2025-11-18","2025-11-19","2025-11-20","2025-11-21","2025-11-22","2025-11-23","2025-11-24","2025-11-25","2025-11-26","2025-11-27","2025-11-28","2025-11-29","2025-11-30","2025-12-01","2025-12-02","2025-12-03","2025-12-04","2025-12-05","2025-12-06","2025-12-07","2025-12-08","2025-12-09","2025-12-10","2025-12-11","2025-12-12","2025-12-13","2025-12-14","2025-12-15","2025-12-16","2025-12-17","2025-12-18","2025-12-19","2025-12-20","2025-12-21","2025-12-22","2025-12-23","2025-12-24","2025-12-25","2025-12-26","2025-12-27","2025-12-28","2025-12-29","2025-12-30","2025-12-31","2026-01-01","2026-01-02","2026-01-03","2026-01-04","2026-01-05","2026-01-06","2026-01-07","2026-01-08","2026-01-09","2026-01-10","2026-01-11","2026-01-12","2026-01-13","2026-01-14","2026-01-15","2026-01-16","2026-01-17","2026-01-18","2026-01-19","2026-01-20","2026-01-21","2026-01-22","2026-01-23","2026-01-24","2026-01-25","2026-01-26","2026-01-27","2026-01-28","2026-01-29","2026-01-30","2026-01-31","2026-02-01","2026-02-02","2026-02-03","2026-02-04","2026-02-05","2026-02-06","2026-02-07","2026-02-08","2026-02-09","2026-02-10","2026-02-11","2026-02-12","2026-02-13","2026-02-14","2026-02-15","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-21","2026-02-22","2026-02-23","2026-02-24","2026-02-25","2026-02-26","2026-02-27","2026-02-28","2026-03-01","2026-03-02","2026-03-03","2026-03-04","2026-03-05","2026-03-06","2026-03-07","2026-03-08","2026-03-09","2026-03-10","2026-03-11","2026-03-12","2026-03-13","2026-03-14","2026-03-15","2026-03-16","2026-03-17","2026-03-18","2026-03-19","2026-03-20","2026-03-21","2026-03-22","2026-03-23","2026-03-24","2026-03-25","2026-03-26","2026-03-27","2026-03-28","2026-03-29","2026-03-30","2026-03-31","2026-04-01","2026-04-02","2026-04-03","2026-04-04","2026-04-05","2026-04-06","2026-04-07","2026-04-08","2026-04-09","2026-04-10","2026-04-11","2026-04-12","2026-04-13","2026-04-14","2026-04-15","2026-04-16","2026-04-17","2026-04-18","2026-04-19","2026-04-20","2026-04-21","2026-04-22","2026-04-23","2026-04-24","2026-04-25"],"st":[13.65,9.0,13.18,12.86,17.58,13.84,10.01,12.02,9.38,11.11,17.87,7.54,15.88,10.99,9.74,12.1,9.3,12.36,12.55,13.89,11.19,13.54,12.83,13.54,12.36,10.74,6.72,14.18,14.97,11.93,11.7,13.27,10.34,18.54,12.23,10.91,11.74,13.76,10.16,10.04,11.39,12.2,8.1,12.89,7.28,14.71,8.3,14.23,18.71,7.8,5.91,18.1,16.66,6.41,18.26,15.06,6.78,5.77,7.16,15.17,9.84,17.73,10.41,15.82,5.01,7.01,16.65,16.36,17.86,15.33,7.98,6.04,7.47,15.18,15.15,8.31,17.87,14.09,5.45,6.08,13.99,13.48,12.29,15.6,7.09,7.09,9.03,9.03,9.06,14.44,9.11,8.76,8.44,null,11.55,13.52,13.52,13.52,13.52,7.77,7.77,7.77,7.77,null,16.22,16.14,19.04,6.14,9.74,6.79,9.67,16.88,15.64,10.21,13.44,4.63,13.68,6.33,14.4,12.3,13.67,6.93,10.89,12.71,11.04,10.56,16.97,12.33,7.22,15.94,7.19,7.18,18.5,9.39,15.23,6.53,14.84,17.56,7.02,8.33,17.09,7.04,17.98,7.32,6.31,9.48,15.28,14.13,14.29,7.63,15.56,6.01,7.76,16.39,6.81,15.91,14.8,8.96,16.55,5.89,13.26,10.21,15.84,8.87,18.0,7.13,12.03,17.14,8.86,14.3,12.68,9.49,7.45,15.39,7.25,15.47,5.86,7.03,12.64,7.46,6.01,15.26,10.07,8.56,9.13,9.65,16.54,9.72,16.16,9.16,8.91,8.48,10.33,18.51,7.32,17.48,12.48,9.16,10.32,10.91,12.75,6.39,11.14,11.12,9.32,5.62,13.94,9.42,10.68,11.41,8.21,8.84,13.04,8.68,9.49,8.88,6.23,6.26,8.64,9.88,4.9,16.06,7.31,9.74,12.36,8.92,6.11,7.67,6.56,9.27,7.22,null,8.28,8.96,8.11,14.19,7.81,9.59,7.71,10.99,9.12,8.29,13.17,7.88,9.22,17.26,13.18,6.52,8.59,6.27,4.83,7.13,6.79,7.31,6.16,12.25,9.49,7.83,9.15,8.17,7.43,6.5,8.73,9.95,8.06,null,10.43,9.51,12.43,7.8,12.23,12.3,10.2,10.37,12.1,10.15,4.94,7.74,8.62,5.63,8.39,10.71,7.48,7.52,5.82,8.78,9.9,10.27,13.13,12.32,8.99,9.5,7.6,9.39,9.33,14.73,16.75,10.13,5.97,null,null,null,null,null,null,null,null,null,null,8.65,9.1,18.26,12.07,7.77,5.05,7.03,6.74,7.92,6.29,15.1,8.66,8.09,19.76,12.04,20.08,6.15,12.71,10.47,17.23,7.74,9.2,11.31,6.96,7.1,5.1,7.17,8.82,5.75,7.49,7.19,11.5,6.79,7.1,18.61,14.22,19.2,8.63,7.77,7.23,17.05,12.81,15.06,11.89,4.24,16.58,7.7,14.12,18.28,12.69,14.62,18.62,4.46,14.17,16.29,9.74,17.59,6.77,17.23,9.19,5.84,9.54,12.16,7.78,7.32,8.13,5.45],"kc":[2492.0,1916.0,2286.0,2366.0,2853.0,2482.0,1919.0,2218.0,1848.0,2115.0,2930.0,1834.0,2729.0,2072.0,2051.0,2151.0,1920.0,2274.0,2261.0,2533.0,2113.0,2517.0,2351.0,2377.0,2294.0,1971.0,1854.0,2515.0,2809.0,2179.0,2177.0,2321.0,2008.0,3554.0,2162.0,2177.0,2042.0,2606.0,1975.0,2015.0,2078.0,2223.0,1853.0,2386.0,1717.0,2348.0,1835.0,2438.0,3447.0,1828.0,1682.0,2800.0,2556.0,1781.0,3096.0,2807.0,1763.0,1647.0,1717.0,2385.0,2006.0,3076.0,1987.0,2683.0,1816.0,1616.0,2780.0,3093.0,2952.0,2370.0,1867.0,1744.0,1832.0,2542.0,2687.0,1841.0,2941.0,2524.0,1745.0,1679.0,2257.0,2378.0,2289.0,2905.0,1234.0,1234.0,1927.0,1927.0,2110.0,2616.0,1876.0,1881.0,2024.0,null,2053.0,2730.0,2730.0,2730.0,2730.0,1720.0,1720.0,1720.0,1720.0,null,2724.0,2791.0,3163.0,1816.0,1971.0,1635.0,1950.0,2771.0,2677.0,1962.0,2172.0,1620.0,2167.0,1776.0,2161.0,2184.0,2184.0,1833.0,2081.0,2276.0,2064.0,1954.0,2975.0,2277.0,1732.0,2538.0,1772.0,1741.0,3079.0,1959.0,2605.0,1802.0,2390.0,2750.0,1688.0,1816.0,2863.0,1782.0,2663.0,1888.0,1808.0,1930.0,2529.0,2625.0,2120.0,1870.0,2239.0,1878.0,1736.0,2168.0,1873.0,2433.0,2815.0,1844.0,2362.0,1673.0,2370.0,2133.0,2593.0,1976.0,2793.0,1961.0,2019.0,2559.0,1955.0,2293.0,2257.0,2084.0,1805.0,2701.0,1885.0,2595.0,1708.0,1830.0,2342.0,1807.0,1809.0,2376.0,2114.0,1933.0,2022.0,2022.0,2920.0,1960.0,2577.0,2073.0,1868.0,1482.0,2098.0,3174.0,1840.0,2740.0,2348.0,1924.0,2121.0,2187.0,2349.0,1663.0,2212.0,2190.0,1964.0,952.0,1754.0,1722.0,2169.0,2133.0,1959.0,1917.0,2462.0,1982.0,2086.0,1875.0,1798.0,1235.0,1874.0,2196.0,1697.0,2437.0,2010.0,1950.0,2305.0,2096.0,1745.0,1901.0,1794.0,1927.0,1678.0,null,1969.0,1982.0,1928.0,2374.0,1710.0,2053.0,1892.0,2144.0,1950.0,1944.0,2576.0,1658.0,2008.0,3501.0,2161.0,1868.0,2019.0,1663.0,1775.0,1910.0,1745.0,1926.0,1756.0,2263.0,1989.0,1848.0,1989.0,1909.0,2052.0,1628.0,1863.0,2143.0,2037.0,null,2048.0,2003.0,2369.0,1901.0,2251.0,2189.0,1978.0,2130.0,2338.0,1940.0,1885.0,1920.0,1894.0,1777.0,1882.0,2139.0,1895.0,1943.0,1807.0,1970.0,2042.0,1966.0,2535.0,2272.0,2050.0,2046.0,1822.0,1948.0,1984.0,2788.0,3501.0,1887.0,395.0,null,null,null,null,null,null,null,null,null,null,676.0,2008.0,3060.0,2462.0,1939.0,1615.0,1815.0,1819.0,1874.0,1920.0,2605.0,1811.0,1760.0,3855.0,2254.0,4043.0,1495.0,2480.0,1809.0,3723.0,1795.0,1976.0,2096.0,1899.0,1937.0,1689.0,1846.0,1967.0,1782.0,1990.0,1767.0,2403.0,1876.0,1841.0,3487.0,2588.0,3704.0,1807.0,1919.0,1830.0,2897.0,2230.0,2722.0,2220.0,1734.0,2603.0,1974.0,2283.0,2991.0,2599.0,2644.0,2755.0,1688.0,2338.0,2817.0,2105.0,3020.0,1733.0,2719.0,2281.0,1413.0,1889.0,2231.0,1958.0,1849.0,1897.0,1433.0],"wk":[0.0,0.0,0.0,267.0,963.0,0.0,504.0,0.0,59.0,0.0,593.0,187.0,0.0,724.0,0.0,116.0,317.0,59.0,475.0,0.0,240.0,0.0,370.0,217.0,317.0,0.0,0.0,510.0,507.0,0.0,448.0,538.0,231.0,1088.0,286.0,0.0,342.0,208.0,0.0,79.0,0.0,0.0,0.0,137.0,0.0,340.0,132.0,349.0,0.0,1037.0,0.0,988.0,0.0,465.0,813.0,152.0,560.0,0.0,0.0,316.0,91.0,884.0,0.0,688.0,0.0,52.0,678.0,314.0,1700.0,0.0,426.0,0.0,0.0,619.0,646.0,0.0,708.0,458.0,0.0,0.0,626.0,282.0,337.0,80.0,33.0,33.0,33.0,33.0,82.0,0.0,212.0,126.0,49.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,145.0,525.0,35.0,1569.0,0.0,0.0,0.0,113.0,694.0,0.0,1007.0,271.0,0.0,483.0,0.0,299.0,0.0,790.0,42.0,441.0,78.0,95.0,81.0,196.0,916.0,0.0,545.0,0.0,48.0,646.0,0.0,713.0,0.0,458.0,551.0,56.0,125.0,0.0,713.0,872.0,0.0,0.0,0.0,657.0,0.0,1117.0,0.0,383.0,0.0,0.0,445.0,0.0,403.0,0.0,482.0,614.0,0.0,472.0,75.0,455.0,54.0,708.0,0.0,189.0,405.0,44.0,389.0,633.0,0.0,0.0,627.0,0.0,0.0,554.0,0.0,450.0,0.0,0.0,626.0,0.0,0.0,0.0,0.0,530.0,0.0,505.0,0.0,0.0,0.0,59.0,1250.0,0.0,640.0,185.0,79.0,82.0,0.0,208.0,0.0,0.0,80.0,0.0,0.0,118.0,199.0,74.0,348.0,0.0,0.0,256.0,60.0,0.0,0.0,70.0,0.0,0.0,0.0,0.0,726.0,0.0,0.0,358.0,0.0,0.0,0.0,0.0,0.0,234.0,0.0,0.0,0.0,0.0,428.0,0.0,0.0,110.0,144.0,0.0,0.0,0.0,135.0,124.0,491.0,101.0,0.0,75.0,0.0,0.0,0.0,0.0,0.0,0.0,345.0,0.0,0.0,0.0,67.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,80.0,246.0,0.0,241.0,0.0,132.0,85.0,232.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,302.0,0.0,398.0,207.0,125.0,159.0,0.0,0.0,0.0,506.0,1231.0,299.0,105.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,213.0,101.0,758.0,229.0,724.0,0.0,0.0,0.0,0.0,0.0,538.0,162.0,0.0,727.0,168.0,1588.0,1078.0,787.0,56.0,464.0,62.0,0.0,95.0,0.0,0.0,0.0,130.0,0.0,0.0,80.0,55.0,88.0,0.0,144.0,758.0,221.0,1947.0,364.0,244.0,0.0,636.0,387.0,248.0,781.0,0.0,852.0,0.0,473.0,724.0,108.0,1294.0,716.0,0.0,429.0,297.0,277.0,800.0,73.0,664.0,0.0,0.0,0.0,109.0,0.0,0.0,0.0,0.0],"rm":[2492.0,1916.0,2286.0,2099.0,1890.0,2482.0,1415.0,2218.0,1790.0,2115.0,2336.0,1647.0,2729.0,1348.0,2051.0,2035.0,1603.0,2215.0,1787.0,2533.0,1873.0,2517.0,1981.0,2160.0,1977.0,1971.0,1854.0,2004.0,2302.0,2179.0,1729.0,1783.0,1778.0,2467.0,1876.0,2177.0,1700.0,2398.0,1975.0,1936.0,2078.0,2223.0,1853.0,2248.0,1717.0,2008.0,1704.0,2089.0,3447.0,791.0,1682.0,1811.0,2556.0,1315.0,2284.0,2654.0,1203.0,1647.0,1717.0,2069.0,1915.0,2192.0,1987.0,1996.0,1816.0,1564.0,2102.0,2778.0,1251.0,2370.0,1441.0,1744.0,1832.0,1923.0,2041.0,1841.0,2233.0,2066.0,1745.0,1679.0,1630.0,2096.0,1952.0,2824.0,1202.0,1202.0,1895.0,1895.0,2029.0,2616.0,1663.0,1755.0,1975.0,null,2053.0,2730.0,2730.0,2730.0,2730.0,1720.0,1720.0,1720.0,1720.0,null,2199.0,2756.0,1594.0,1816.0,1971.0,1635.0,1838.0,2077.0,2677.0,955.0,1901.0,1620.0,1684.0,1776.0,1862.0,2184.0,1394.0,1791.0,1640.0,2198.0,1969.0,1873.0,2780.0,1361.0,1732.0,1993.0,1772.0,1693.0,2433.0,1959.0,1892.0,1802.0,1932.0,2199.0,1632.0,1691.0,2863.0,1069.0,1791.0,1888.0,1808.0,1930.0,1871.0,2625.0,1004.0,1870.0,1856.0,1878.0,1736.0,1724.0,1873.0,2030.0,2815.0,1363.0,1748.0,1673.0,1898.0,2058.0,2138.0,1922.0,2085.0,1961.0,1829.0,2154.0,1911.0,1904.0,1624.0,2084.0,1805.0,2074.0,1885.0,2595.0,1154.0,1830.0,1893.0,1807.0,1809.0,1750.0,2114.0,1933.0,2022.0,2022.0,2391.0,1960.0,2072.0,2073.0,1868.0,1482.0,2038.0,1924.0,1840.0,2100.0,2163.0,1845.0,2039.0,2187.0,2141.0,1663.0,2212.0,2110.0,1964.0,952.0,1635.0,1523.0,2095.0,1785.0,1959.0,1917.0,2206.0,1923.0,2086.0,1875.0,1728.0,1235.0,1874.0,2196.0,1697.0,1711.0,2010.0,1950.0,1947.0,2096.0,1745.0,1901.0,1794.0,1927.0,1444.0,null,1969.0,1982.0,1928.0,1946.0,1710.0,2053.0,1782.0,2000.0,1950.0,1944.0,2576.0,1523.0,1884.0,3010.0,2061.0,1868.0,1944.0,1663.0,1775.0,1910.0,1745.0,1926.0,1756.0,1918.0,1989.0,1848.0,1989.0,1842.0,2052.0,1628.0,1863.0,2143.0,2037.0,null,2048.0,1923.0,2123.0,1901.0,2010.0,2189.0,1846.0,2045.0,2106.0,1940.0,1885.0,1920.0,1894.0,1777.0,1882.0,2139.0,1895.0,1943.0,1807.0,1970.0,1739.0,1966.0,2137.0,2065.0,1925.0,1887.0,1822.0,1948.0,1984.0,2282.0,2270.0,1588.0,290.0,null,null,null,null,null,null,null,null,null,null,463.0,1907.0,2302.0,2233.0,1216.0,1615.0,1815.0,1819.0,1874.0,1920.0,2067.0,1649.0,1760.0,3128.0,2086.0,2456.0,417.0,1693.0,1754.0,3259.0,1732.0,1976.0,2001.0,1899.0,1937.0,1689.0,1716.0,1967.0,1782.0,1910.0,1712.0,2315.0,1876.0,1697.0,2729.0,2366.0,1757.0,1443.0,1675.0,1830.0,2261.0,1843.0,2474.0,1439.0,1734.0,1751.0,1974.0,1809.0,2267.0,2492.0,1350.0,2039.0,1688.0,1909.0,2520.0,1828.0,2220.0,1660.0,2055.0,2281.0,1413.0,1889.0,2122.0,1958.0,1849.0,1897.0,1433.0],"ac":[null,null,null,null,null,null,null,null,null,1.01,1.03,0.95,0.95,0.97,0.96,0.99,0.98,0.92,0.97,0.94,0.95,0.99,1.0,1.04,1.04,1.03,0.96,0.99,1.0,0.98,0.96,0.97,0.99,1.11,1.08,1.04,1.03,1.05,1.03,1.02,0.95,0.95,0.92,0.93,0.86,0.91,0.9,0.93,0.99,1.0,0.94,1.05,1.06,1.05,1.07,1.02,1.03,1.05,0.93,0.91,0.95,0.95,0.9,0.99,1.0,1.02,1.02,1.08,1.06,1.11,1.02,1.05,1.05,1.04,1.0,0.9,0.94,0.99,0.99,1.01,1.0,0.96,1.02,0.99,0.91,0.91,0.94,0.94,0.97,0.98,0.93,0.91,0.83,null,0.89,0.93,0.93,0.93,0.93,0.91,0.91,0.91,0.91,null,0.93,1.02,1.14,1.15,1.12,1.03,1.05,1.05,1.04,0.93,1.03,1.0,1.06,1.01,0.98,0.94,0.98,0.93,0.99,0.97,1.02,0.99,1.02,0.99,1.0,1.05,1.0,0.96,1.05,0.97,1.02,1.01,0.98,1.08,1.08,0.98,1.08,0.98,1.11,1.01,0.89,0.91,1.0,0.96,1.04,0.91,1.0,1.02,1.01,1.0,0.94,0.95,1.02,0.96,1.06,1.04,1.02,1.06,1.05,0.97,1.07,0.99,1.05,1.07,1.08,1.04,1.1,0.99,0.99,1.01,0.92,0.99,0.92,0.85,0.89,0.89,0.78,0.88,0.8,0.86,0.9,0.86,0.98,1.01,1.02,1.01,1.04,1.03,1.06,1.05,1.03,1.05,1.08,1.1,1.14,1.14,1.04,1.06,0.97,0.96,0.95,0.89,0.93,0.88,0.92,0.94,0.91,0.9,0.98,0.92,0.94,0.92,0.88,0.86,0.86,0.81,0.77,0.87,0.85,0.93,1.02,1.02,0.98,1.04,0.91,0.93,0.91,null,0.85,0.86,0.88,0.98,1.01,1.02,1.04,1.07,1.07,1.1,1.06,1.07,1.06,1.16,1.16,1.13,1.14,1.04,1.03,1.0,0.85,0.77,0.77,0.81,0.86,0.9,0.93,0.95,0.95,0.97,0.91,0.93,0.94,null,0.95,0.97,1.04,1.07,1.11,1.15,1.17,1.17,1.23,1.21,1.17,1.1,1.03,0.96,0.92,0.88,0.84,0.88,0.87,0.87,0.93,0.96,0.98,1.03,1.05,1.1,1.09,1.08,1.07,1.07,1.12,1.13,1.1,null,null,null,null,null,null,null,null,null,null,1.13,1.13,1.23,1.19,1.07,0.99,1.01,0.99,0.96,0.79,0.82,0.83,0.88,1.01,1.07,1.2,1.21,1.18,1.21,1.3,1.15,1.11,0.98,1.0,0.95,0.91,0.78,0.79,0.75,0.7,0.73,0.8,0.82,0.82,0.92,1.02,1.14,1.15,1.12,1.14,1.23,1.18,1.18,1.12,1.06,1.17,1.19,1.16,1.19,1.15,1.17,1.31,1.17,1.21,1.21,1.1,1.12,1.03,0.98,1.04,0.95,0.87,0.91,0.81,0.85,0.74,0.7],"rs":[null,66.0,69.0,38.0,94.0,65.0,40.0,28.0,52.0,94.0,98.0,63.0,65.0,56.0,67.0,84.0,96.0,96.0,92.0,63.0,37.0,69.0,55.0,70.0,43.0,67.0,37.0,33.0,72.0,56.0,37.0,64.0,53.0,78.0,40.0,47.0,45.0,90.0,73.0,37.0,59.0,41.0,41.0,76.0,47.0,79.0,79.0,63.0,70.0,50.0,97.0,76.0,89.0,81.0,76.0,51.0,69.0,97.0,96.0,40.0,71.0,58.0,31.0,68.0,79.0,96.0,94.0,32.0,49.0,68.0,71.0,84.0,75.0,83.0,58.0,35.0,29.0,28.0,48.0,95.0,80.0,80.0,49.0,49.0,13.0,45.0,13.0,45.0,null,56.0,24.0,35.0,37.0,null,33.0,50.0,50.0,52.0,52.0,50.0,50.0,52.0,52.0,null,54.0,66.0,71.0,70.0,37.0,53.0,67.0,81.0,26.0,42.0,85.0,80.0,93.0,83.0,69.0,74.0,62.0,51.0,96.0,95.0,82.0,38.0,80.0,33.0,51.0,73.0,54.0,96.0,94.0,58.0,47.0,36.0,74.0,56.0,18.0,43.0,95.0,87.0,76.0,34.0,70.0,38.0,36.0,49.0,54.0,94.0,74.0,34.0,79.0,75.0,83.0,85.0,57.0,19.0,84.0,82.0,62.0,77.0,44.0,26.0,58.0,39.0,25.0,78.0,73.0,81.0,65.0,73.0,88.0,93.0,60.0,69.0,24.0,87.0,60.0,65.0,79.0,83.0,69.0,64.0,77.0,69.0,49.0,41.0,64.0,40.0,43.0,null,41.0,51.0,53.0,69.0,58.0,22.0,40.0,32.0,57.0,54.0,81.0,30.0,61.0,39.0,null,14.0,64.0,42.0,90.0,58.0,60.0,51.0,42.0,49.0,57.0,54.0,38.0,33.0,76.0,75.0,67.0,81.0,86.0,39.0,32.0,32.0,50.0,50.0,75.0,null,39.0,62.0,78.0,69.0,35.0,59.0,62.0,72.0,46.0,85.0,95.0,18.0,93.0,63.0,1.0,1.0,36.0,31.0,53.0,56.0,65.0,70.0,67.0,85.0,67.0,76.0,68.0,79.0,96.0,54.0,76.0,88.0,31.0,null,83.0,56.0,63.0,59.0,72.0,59.0,3.0,56.0,52.0,52.0,51.0,48.0,52.0,78.0,42.0,53.0,38.0,41.0,69.0,34.0,51.0,78.0,78.0,69.0,61.0,34.0,84.0,72.0,80.0,71.0,49.0,22.0,null,null,null,null,null,null,null,null,null,null,null,null,72.0,69.0,68.0,69.0,90.0,90.0,79.0,88.0,57.0,77.0,63.0,79.0,51.0,13.0,31.0,20.0,53.0,19.0,69.0,60.0,67.0,97.0,97.0,95.0,55.0,61.0,85.0,56.0,84.0,56.0,63.0,64.0,81.0,66.0,67.0,26.0,26.0,1.0,60.0,45.0,7.0,38.0,38.0,43.0,72.0,61.0,75.0,79.0,65.0,23.0,26.0,50.0,47.0,44.0,49.0,81.0,28.0,37.0,47.0,24.0,48.0,50.0,83.0,95.0,92.0,69.0],"hv":[null,45.7,43.1,33.3,56.8,41.8,34.0,26.4,35.1,50.8,57.9,41.6,42.8,42.0,46.2,53.2,60.5,63.0,65.4,51.4,39.3,53.3,46.4,53.0,40.4,54.3,37.1,34.9,50.4,44.7,34.8,43.3,41.5,50.3,38.0,40.5,38.8,56.8,48.3,35.1,42.5,36.4,36.2,47.5,37.6,48.4,49.2,44.4,47.2,41.0,58.1,50.7,54.6,53.1,51.0,42.6,49.9,60.4,59.2,39.7,50.9,45.8,33.6,48.7,51.6,68.5,70.8,35.5,43.2,54.5,55.6,61.7,55.8,62.8,52.6,41.5,34.5,34.4,42.4,71.9,58.3,58.7,45.1,46.9,55.8,38.2,55.8,38.2,null,46.0,28.3,34.1,34.4,null,32.5,37.8,37.8,38.9,38.9,37.8,37.8,38.9,38.9,null,37.8,44.0,47.7,45.8,33.7,38.9,43.9,52.6,34.0,38.7,51.7,53.8,60.6,56.8,53.1,56.3,52.8,47.6,61.9,67.6,59.0,39.2,58.4,36.4,46.8,55.0,45.5,67.4,68.0,53.1,46.8,40.3,57.5,49.5,28.6,38.8,74.9,66.9,58.0,39.1,55.6,42.8,40.7,49.4,46.1,67.4,55.3,37.0,57.7,57.4,64.4,65.9,53.2,35.9,65.0,63.3,59.8,63.2,47.0,35.4,53.0,41.4,44.9,55.8,56.0,59.0,54.6,58.2,72.4,74.3,55.6,59.4,35.0,71.8,55.5,56.6,67.1,64.9,60.8,60.2,63.4,61.5,52.4,46.3,59.7,47.9,49.6,null,40.1,44.2,45.9,56.3,49.3,28.9,39.7,37.1,47.8,48.2,61.2,36.5,46.6,40.5,null,21.8,46.6,36.2,61.2,43.4,42.4,38.8,36.7,40.1,41.0,40.7,36.7,34.0,43.7,45.6,43.6,48.1,52.5,37.6,34.2,33.3,39.1,36.0,45.8,null,31.1,37.8,42.4,39.8,31.6,39.0,37.8,41.8,36.2,44.2,49.1,35.1,50.3,42.5,21.6,19.0,27.1,27.9,32.0,32.5,35.9,38.0,37.1,41.9,38.8,40.8,39.4,41.3,51.6,37.6,42.9,45.9,34.2,null,45.8,33.7,36.2,35.3,40.2,36.0,23.1,35.1,32.6,32.7,31.3,28.8,31.8,37.2,29.4,31.2,28.0,28.8,33.4,26.1,30.1,37.0,36.9,34.7,34.4,27.5,40.2,36.5,37.8,36.3,31.5,24.9,null,null,null,null,null,null,null,null,null,null,null,null,31.6,30.8,31.4,33.0,39.2,46.6,38.4,44.4,36.3,42.2,61.1,49.4,39.2,27.2,28.0,34.9,34.6,29.3,38.1,35.7,37.5,50.6,53.5,56.8,37.6,42.0,53.5,43.1,52.6,43.5,41.6,44.4,50.0,45.6,49.5,32.5,33.6,30.8,38.7,31.5,18.5,26.7,28.7,29.5,42.5,34.3,41.3,43.1,38.6,25.8,23.9,35.2,31.8,29.3,30.1,40.6,25.3,26.6,29.1,24.3,32.1,29.1,40.5,58.5,62.4,41.6],"hr":[null,62.0,66.0,72.0,62.0,69.0,71.0,72.0,69.0,62.0,60.0,66.0,65.0,65.0,65.0,60.0,59.0,54.0,54.0,56.0,65.0,59.0,63.0,60.0,64.0,60.0,68.0,67.0,59.0,62.0,63.0,61.0,60.0,56.0,67.0,67.0,65.0,60.0,60.0,67.0,63.0,66.0,66.0,61.0,67.0,60.0,61.0,63.0,61.0,67.0,59.0,61.0,59.0,61.0,58.0,63.0,64.0,60.0,59.0,65.0,61.0,63.0,66.0,61.0,62.0,53.0,54.0,68.0,66.0,62.0,63.0,58.0,60.0,57.0,61.0,66.0,60.0,67.0,65.0,54.0,57.0,61.0,65.0,65.0,64.0,65.0,64.0,65.0,null,64.0,67.0,71.0,71.0,null,70.0,66.0,66.0,69.0,69.0,66.0,66.0,69.0,69.0,null,69.0,65.0,63.0,64.0,68.0,66.0,61.0,57.0,68.0,66.0,62.0,61.0,60.0,60.0,59.0,59.0,61.0,63.0,58.0,57.0,56.0,64.0,59.0,68.0,63.0,59.0,62.0,56.0,56.0,60.0,62.0,67.0,58.0,61.0,70.0,64.0,58.0,60.0,58.0,65.0,59.0,65.0,65.0,65.0,66.0,56.0,58.0,66.0,58.0,57.0,56.0,57.0,63.0,71.0,57.0,59.0,60.0,58.0,63.0,67.0,60.0,63.0,68.0,57.0,62.0,59.0,60.0,57.0,53.0,54.0,55.0,56.0,66.0,59.0,60.0,60.0,59.0,58.0,59.0,61.0,58.0,55.0,58.0,62.0,59.0,63.0,63.0,null,62.0,64.0,63.0,60.0,61.0,66.0,62.0,66.0,63.0,64.0,58.0,67.0,60.0,63.0,null,78.0,62.0,68.0,60.0,61.0,63.0,65.0,70.0,68.0,67.0,62.0,63.0,66.0,62.0,61.0,65.0,61.0,59.0,65.0,62.0,67.0,65.0,63.0,63.0,null,68.0,63.0,64.0,63.0,65.0,66.0,64.0,63.0,68.0,66.0,63.0,71.0,64.0,69.0,90.0,87.0,69.0,69.0,65.0,64.0,63.0,62.0,64.0,64.0,67.0,66.0,66.0,63.0,61.0,67.0,60.0,62.0,65.0,null,63.0,66.0,67.0,68.0,65.0,68.0,80.0,74.0,68.0,71.0,70.0,64.0,69.0,67.0,70.0,67.0,68.0,66.0,68.0,69.0,71.0,68.0,69.0,69.0,70.0,70.0,65.0,66.0,66.0,71.0,72.0,81.0,null,null,null,null,null,null,null,null,null,null,null,null,67.0,69.0,68.0,66.0,64.0,61.0,65.0,62.0,70.0,68.0,64.0,64.0,73.0,75.0,71.0,70.0,71.0,71.0,70.0,66.0,66.0,62.0,61.0,59.0,62.0,62.0,59.0,63.0,61.0,58.0,61.0,67.0,66.0,67.0,68.0,70.0,70.0,76.0,67.0,70.0,86.0,68.0,71.0,70.0,64.0,70.0,71.0,67.0,68.0,82.0,76.0,70.0,71.0,71.0,70.0,70.0,78.0,71.0,73.0,78.0,69.0,72.0,68.0,63.0,63.0,62.0],"so":[null,95.9,96.7,97.2,96.2,96.7,96.6,97.2,95.8,96.5,96.6,95.8,97.1,94.6,96.3,97.9,97.0,97.0,95.8,95.7,94.5,97.8,96.4,96.0,96.5,97.0,95.1,96.8,97.3,95.2,95.9,96.3,96.5,96.0,98.0,95.5,96.1,96.7,98.3,97.7,96.6,97.3,97.0,98.0,97.7,98.6,98.1,98.3,96.9,96.2,98.5,96.0,96.5,97.7,98.8,97.0,97.8,98.2,95.1,96.7,98.6,96.4,98.3,97.5,97.8,98.2,98.2,96.9,98.4,97.3,98.3,97.9,97.4,97.4,97.5,97.6,98.8,98.4,97.9,98.2,99.5,96.4,97.8,97.0,97.0,96.9,97.0,96.9,null,98.0,94.0,96.2,96.1,null,96.8,97.3,97.3,96.3,96.3,97.3,97.3,96.3,96.3,null,98.5,96.8,93.4,97.4,96.0,95.5,97.3,97.4,97.8,95.1,96.6,96.5,97.4,96.0,91.3,92.8,98.1,95.5,97.5,94.8,95.6,97.2,97.5,95.4,95.5,96.1,98.2,96.5,95.0,95.8,98.3,97.8,98.0,96.2,97.5,97.9,98.6,93.9,98.5,97.3,98.6,96.8,97.7,98.3,96.8,96.7,97.4,96.8,97.7,99.0,97.3,97.2,97.7,97.7,96.5,96.6,95.8,96.3,97.8,98.0,97.4,98.2,97.7,95.0,94.8,97.1,97.7,98.4,96.9,95.3,97.1,95.7,98.6,95.7,98.2,97.7,97.3,97.4,95.7,97.7,96.9,96.8,97.6,96.7,94.6,96.7,96.1,null,96.7,97.0,97.0,96.7,96.9,94.7,97.9,95.3,94.9,97.4,96.3,96.6,97.4,96.5,null,97.4,97.2,97.8,98.1,96.7,97.4,97.3,96.1,95.3,96.9,97.4,97.5,97.3,97.1,95.4,95.6,94.7,94.7,94.5,96.5,97.4,97.0,95.5,97.6,null,96.2,97.1,97.1,97.1,97.9,95.8,96.0,95.3,96.5,96.2,96.8,96.9,97.1,95.6,92.5,97.0,95.9,95.6,97.2,96.2,97.1,94.8,96.5,96.2,96.2,97.0,95.8,97.0,96.4,95.9,97.4,97.6,98.8,null,96.4,95.5,97.6,96.4,95.4,97.8,98.0,95.7,96.3,96.0,96.9,95.2,96.0,97.3,96.5,95.8,97.2,96.3,95.9,96.7,96.0,97.1,97.4,96.7,96.8,96.8,96.5,97.7,95.8,96.1,96.5,95.7,null,null,null,null,null,null,null,null,null,null,null,null,96.8,97.4,97.2,96.0,97.4,95.6,98.2,97.8,91.4,94.2,94.1,93.9,93.1,93.3,93.8,95.3,93.2,92.3,97.8,97.6,98.4,97.3,97.2,95.8,98.2,98.5,97.3,97.3,97.2,96.4,96.2,91.4,94.6,92.0,93.4,94.5,95.6,null,93.5,91.3,93.2,95.1,94.4,93.6,92.5,93.0,93.2,94.8,93.6,92.9,94.9,93.1,93.6,94.9,91.2,93.6,95.2,93.1,93.5,91.1,91.4,97.8,97.0,95.7,96.9,95.3],"sk":[null,33.85,33.6,34.1,33.95,33.74,33.21,33.3,33.7,32.9,32.73,33.0,32.2,31.93,32.49,32.6,32.7,32.48,32.05,32.4,31.95,32.6,32.2,31.66,32.04,null,32.9,33.0,33.2,32.6,32.43,32.3,32.53,31.3,32.72,32.43,32.83,32.0,32.13,31.54,32.58,31.81,32.35,33.54,32.13,31.92,32.07,32.06,31.93,32.21,32.16,31.59,32.65,32.37,32.58,32.14,32.55,31.87,32.38,32.15,31.98,31.19,32.95,31.47,32.3,32.42,32.19,31.61,31.78,32.37,31.71,32.16,32.54,32.05,32.15,31.93,32.15,31.98,31.92,32.16,31.07,31.52,32.34,31.86,35.07,33.66,35.07,33.66,null,32.89,32.75,32.6,32.63,null,32.98,32.3,32.3,32.93,32.93,32.3,32.3,32.93,32.93,null,32.94,32.7,32.08,32.15,32.77,32.73,32.49,31.82,31.8,31.69,32.03,31.72,32.59,32.31,32.52,32.21,32.88,32.75,32.38,32.32,32.44,32.76,32.58,33.06,33.06,33.12,32.92,32.75,32.65,32.96,32.95,32.7,32.48,32.82,33.34,32.71,32.72,32.01,32.17,32.57,32.97,33.31,32.65,32.25,33.26,32.89,32.65,32.69,33.29,33.0,33.17,32.73,32.74,33.1,32.64,32.77,32.41,33.1,32.63,null,33.3,32.68,34.16,32.68,33.18,32.73,33.11,33.13,32.02,32.81,32.48,32.25,32.79,32.79,32.43,32.29,32.78,33.24,32.22,33.02,32.39,33.49,32.7,32.53,33.08,32.95,33.23,null,33.29,33.34,33.61,32.47,32.96,33.11,33.15,33.02,33.11,33.84,33.29,32.61,32.86,32.6,null,33.29,33.24,33.18,33.14,32.81,32.8,32.78,33.51,33.18,32.95,32.07,33.01,32.59,33.37,33.01,33.25,33.22,32.98,31.86,33.43,33.1,32.09,32.65,32.85,null,32.38,33.34,33.34,32.96,33.53,33.9,32.71,33.24,32.49,32.9,33.36,34.62,33.15,32.62,35.8,36.21,34.05,33.97,33.7,33.3,32.93,32.9,32.43,32.44,32.59,33.22,33.23,32.45,33.84,33.13,33.78,33.71,33.63,null,33.38,33.88,32.78,33.18,33.96,33.59,34.83,33.8,33.78,32.8,33.92,32.61,33.45,33.67,32.99,33.78,null,32.58,33.72,33.81,33.18,33.13,33.85,34.02,34.06,33.08,33.95,32.95,33.95,33.01,32.78,35.2,null,null,null,null,null,null,null,null,null,null,null,null,null,32.74,33.4,32.7,32.87,32.1,32.6,33.02,33.53,34.02,33.72,33.58,33.82,34.43,34.25,33.99,null,33.54,33.45,32.64,33.19,32.7,31.81,32.52,33.02,32.18,31.98,33.17,33.8,33.45,32.89,33.98,33.77,34.12,34.31,33.95,34.94,36.05,34.21,34.3,34.05,33.84,34.38,34.34,34.28,34.43,33.49,33.28,33.93,33.05,32.93,33.87,33.03,33.36,33.87,33.05,32.76,33.51,33.63,33.69,32.57,31.94,31.54,31.0,32.44,31.76],"sd":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,-0.71,-0.55,-0.42,-0.61,-0.98,-0.6,-1.0,-0.33,-0.7,-1.18,-0.77,null,0.09,0.18,0.37,-0.22,-0.38,-0.46,-0.19,-1.33,0.14,-0.11,0.31,-0.47,-0.29,-0.84,0.21,-0.52,0.01,1.15,-0.25,-0.43,-0.26,-0.26,-0.38,-0.1,-0.16,-0.69,0.35,0.05,0.24,-0.19,0.23,-0.41,0.12,-0.09,-0.25,-1.0,0.75,-0.74,0.11,0.22,0.01,-0.55,-0.37,0.2,-0.44,0.0,0.38,-0.06,0.03,-0.18,0.03,-0.13,-0.2,0.05,-1.01,-0.56,0.28,-0.19,2.94,1.47,2.94,1.47,null,0.7,0.53,0.37,0.39,null,0.7,-0.02,-0.02,0.62,0.62,-0.02,-0.02,0.62,0.62,null,0.58,0.32,-0.29,-0.21,0.37,0.29,0.05,-0.63,-0.63,-0.72,-0.37,-0.67,0.18,-0.1,0.08,-0.23,0.41,0.22,-0.17,-0.24,-0.13,0.26,0.12,0.6,0.58,0.63,0.42,0.25,0.15,0.45,0.45,0.2,-0.04,0.27,0.78,0.15,0.15,-0.56,-0.42,-0.05,0.32,0.61,-0.05,-0.46,0.53,0.14,-0.09,-0.05,0.52,0.2,0.36,-0.09,-0.08,0.28,-0.16,-0.03,-0.37,0.31,-0.16,null,0.51,-0.11,1.3,-0.17,0.33,-0.11,0.25,0.23,-0.87,-0.08,-0.4,-0.59,-0.06,-0.08,-0.41,-0.53,-0.05,0.39,-0.58,0.21,-0.39,0.68,-0.11,-0.25,0.28,0.15,0.4,null,0.45,0.48,0.72,-0.39,0.09,0.27,0.3,0.18,0.25,0.95,0.4,-0.3,-0.05,-0.31,null,0.34,0.27,0.21,0.14,-0.21,-0.22,-0.22,0.46,0.12,-0.12,-0.95,-0.03,-0.45,0.32,-0.04,0.2,0.17,-0.06,-1.11,0.42,0.09,-0.89,-0.31,-0.11,null,-0.55,0.42,0.42,0.03,0.58,0.91,-0.26,0.27,-0.46,-0.04,0.4,1.6,0.12,-0.38,2.71,3.01,0.78,0.67,0.36,-0.03,-0.4,-0.42,-0.86,-0.84,-0.71,-0.07,-0.07,-0.86,0.49,-0.23,0.37,0.29,0.2,null,-0.06,0.43,-0.64,-0.25,0.5,0.1,1.28,0.23,0.24,-0.73,0.35,-0.86,0.08,0.31,-0.33,0.45,null,-0.75,0.37,0.41,-0.24,-0.32,0.39,0.53,0.51,-0.44,0.4,-0.57,0.42,-0.5,-0.7,1.67,null,null,null,null,null,null,null,null,null,null,null,null,null,-0.8,-0.13,-0.79,-0.55,-1.26,-0.72,-0.3,0.22,0.66,0.35,0.21,0.42,1.01,0.8,0.5,null,0.06,-0.04,-0.83,-0.26,-0.7,-1.51,-0.78,-0.25,-1.06,-1.19,-0.01,0.59,0.3,-0.25,0.8,0.57,0.87,1.01,0.59,1.5,2.5,0.64,0.72,0.46,0.25,0.76,0.73,0.66,0.8,-0.14,-0.34,0.3,-0.6,-0.71,0.19,-0.69,-0.39,0.1,-0.75,-1.07,-0.33,-0.21,-0.15,-1.27,-1.82,-2.15,-2.58,-1.08,-1.69],"as":[null,1.36,1.53,2.16,1.09,1.65,2.09,2.73,1.97,1.22,1.04,1.58,1.52,1.55,1.41,1.13,0.98,0.86,0.83,1.09,1.65,1.11,1.36,1.13,1.58,1.11,1.83,1.92,1.17,1.39,1.81,1.41,1.45,1.11,1.76,1.66,1.68,1.06,1.24,1.91,1.48,1.81,1.82,1.28,1.78,1.24,1.24,1.42,1.29,1.63,1.02,1.2,1.08,1.15,1.14,1.48,1.28,0.99,1.0,1.64,1.2,1.37,1.96,1.25,1.2,0.77,0.76,1.91,1.53,1.14,1.13,0.94,1.08,0.91,1.16,1.59,1.74,1.95,1.53,0.75,0.98,1.04,1.44,1.39,1.15,1.7,1.15,1.7,null,1.39,2.36,2.08,2.06,null,2.15,1.75,1.75,1.77,1.77,1.75,1.75,1.77,1.77,null,1.82,1.48,1.32,1.4,2.02,1.7,1.39,1.08,2.0,1.7,1.2,1.13,0.99,1.06,1.11,1.05,1.16,1.32,0.94,0.84,0.95,1.63,1.01,1.87,1.35,1.07,1.36,0.83,0.82,1.13,1.32,1.66,1.01,1.23,2.45,1.65,0.77,0.9,1.0,1.66,1.06,1.52,1.6,1.32,1.43,0.83,1.05,1.78,1.0,0.99,0.87,0.86,1.18,1.98,0.88,0.93,1.0,0.92,1.34,1.89,1.13,1.52,1.51,1.02,1.11,1.0,1.1,0.98,0.73,0.73,0.99,0.94,1.89,0.82,1.08,1.06,0.88,0.89,0.97,1.01,0.91,0.89,1.11,1.34,0.99,1.32,1.27,null,1.55,1.45,1.37,1.07,1.24,2.28,1.56,1.78,1.32,1.33,0.95,1.84,1.29,1.56,null,3.58,1.33,1.88,0.98,1.41,1.49,1.67,1.91,1.7,1.63,1.52,1.72,1.94,1.42,1.34,1.49,1.27,1.12,1.73,1.81,2.01,1.66,1.75,1.38,null,2.19,1.67,1.51,1.58,2.06,1.69,1.69,1.51,1.88,1.49,1.28,2.02,1.27,1.62,4.16,4.59,2.55,2.47,2.03,1.97,1.75,1.63,1.73,1.53,1.72,1.62,1.68,1.53,1.18,1.78,1.4,1.35,1.9,null,1.38,1.96,1.85,1.92,1.62,1.89,3.46,2.11,2.09,2.17,2.23,2.22,2.17,1.8,2.38,2.15,2.43,2.29,2.04,2.64,2.36,1.84,1.87,1.99,2.04,2.55,1.62,1.81,1.75,1.96,2.29,3.26,null,null,null,null,null,null,null,null,null,null,null,null,2.12,2.24,2.17,2.0,1.63,1.31,1.69,1.4,1.93,1.61,1.05,1.29,1.86,2.76,2.53,2.0,2.05,2.43,1.84,1.85,1.76,1.23,1.14,1.04,1.65,1.48,1.1,1.46,1.16,1.33,1.47,1.51,1.32,1.47,1.37,2.16,2.08,2.47,1.73,2.22,4.66,2.54,2.47,2.37,1.51,2.04,1.72,1.55,1.76,3.18,3.18,1.99,2.23,2.43,2.32,1.72,3.08,2.67,2.51,3.21,2.15,2.47,1.68,1.08,1.01,1.49],"sl":[null,489.0,464.0,503.0,450.0,486.0,488.0,498.0,600.0,592.0,525.0,505.0,508.0,456.0,457.0,478.0,483.0,491.0,443.0,471.0,467.0,464.0,520.0,429.0,429.0,349.0,606.0,413.0,497.0,418.0,556.0,494.0,449.0,502.0,469.0,471.0,514.0,489.0,478.0,438.0,434.0,476.0,460.0,534.0,500.0,460.0,476.0,510.0,498.0,566.0,571.0,372.0,456.0,459.0,594.0,632.0,452.0,671.0,544.0,464.0,472.0,548.0,436.0,484.0,622.0,431.0,437.0,444.0,496.0,421.0,492.0,510.0,538.0,388.0,461.0,458.0,456.0,482.0,613.0,402.0,435.0,505.0,428.0,430.0,792.0,792.0,792.0,792.0,null,522.0,369.0,496.0,548.0,null,396.0,428.0,421.0,428.0,421.0,428.0,421.0,428.0,421.0,null,447.0,426.0,444.0,461.0,466.0,534.0,456.0,499.0,454.0,414.0,540.0,394.0,466.0,574.0,408.0,440.0,400.0,472.0,526.0,456.0,468.0,520.0,491.0,448.0,406.0,550.0,496.0,508.0,458.0,430.0,446.0,560.0,503.0,434.0,342.0,608.0,456.0,394.0,535.0,432.0,574.0,412.0,414.0,395.0,509.0,418.0,460.0,530.0,486.0,430.0,490.0,428.0,503.0,350.0,592.0,560.0,348.0,536.0,440.0,430.0,522.0,564.0,366.0,468.0,464.0,449.0,491.0,469.0,401.0,503.0,438.0,433.0,376.0,428.0,460.0,533.0,338.0,614.0,505.0,424.0,438.0,424.0,569.0,628.0,450.0,506.0,413.0,null,467.0,552.0,601.0,431.0,532.0,412.0,499.0,446.0,440.0,365.0,475.0,418.0,413.0,458.0,null,347.0,521.0,405.0,496.0,437.0,553.0,440.0,529.0,495.0,458.0,333.0,435.0,504.0,583.0,414.0,673.0,534.0,451.0,451.0,419.0,387.0,546.0,470.0,440.0,null,460.0,439.0,608.0,490.0,405.0,479.0,414.0,420.0,442.0,498.0,469.0,350.0,463.0,469.0,null,378.0,568.0,444.0,663.0,606.0,580.0,588.0,579.0,620.0,608.0,610.0,474.0,500.0,437.0,502.0,440.0,619.0,255.0,null,453.0,472.0,494.0,464.0,459.0,412.0,null,486.0,540.0,427.0,577.0,461.0,501.0,550.0,448.0,476.0,440.0,434.0,562.0,421.0,461.0,453.0,534.0,474.0,495.0,398.0,540.0,430.0,463.0,486.0,443.0,457.0,null,null,null,null,null,null,null,null,null,null,null,null,462.0,444.0,526.0,487.0,432.0,436.0,450.0,508.0,468.0,404.0,366.0,473.0,570.0,328.0,530.0,410.0,590.0,289.0,596.0,471.0,621.0,579.0,567.0,602.0,583.0,503.0,523.0,653.0,610.0,448.0,560.0,600.0,503.0,438.0,431.0,405.0,412.0,null,530.0,540.0,269.0,614.0,428.0,562.0,469.0,610.0,532.0,562.0,548.0,392.0,561.0,457.0,521.0,577.0,466.0,552.0,369.0,450.0,528.0,300.0,340.0,476.0,539.0,473.0,455.0,690.0],"sp":[null,75.0,82.0,69.0,75.0,73.0,80.0,84.0,100.0,100.0,100.0,91.0,91.0,83.0,89.0,83.0,88.0,87.0,86.0,88.0,89.0,89.0,84.0,84.0,82.0,73.0,80.0,79.0,84.0,81.0,82.0,86.0,83.0,84.0,82.0,88.0,83.0,81.0,83.0,82.0,85.0,87.0,86.0,90.0,84.0,85.0,88.0,87.0,86.0,82.0,90.0,78.0,79.0,81.0,84.0,88.0,82.0,83.0,85.0,76.0,80.0,86.0,84.0,87.0,76.0,78.0,78.0,80.0,81.0,79.0,83.0,88.0,91.0,82.0,81.0,81.0,87.0,81.0,83.0,83.0,82.0,83.0,78.0,79.0,75.0,75.0,75.0,75.0,null,79.0,74.0,73.0,82.0,null,79.0,78.0,77.0,78.0,77.0,78.0,77.0,78.0,77.0,null,73.0,73.0,74.0,78.0,81.0,81.0,78.0,82.0,82.0,78.0,81.0,77.0,86.0,85.0,76.0,84.0,77.0,79.0,84.0,86.0,87.0,88.0,85.0,78.0,82.0,86.0,79.0,90.0,82.0,79.0,83.0,77.0,89.0,85.0,63.0,82.0,79.0,79.0,83.0,81.0,83.0,82.0,77.0,70.0,78.0,80.0,83.0,80.0,79.0,79.0,79.0,80.0,82.0,55.0,82.0,82.0,66.0,80.0,79.0,79.0,81.0,79.0,74.0,78.0,70.0,81.0,82.0,84.0,83.0,86.0,85.0,85.0,73.0,80.0,85.0,83.0,73.0,83.0,81.0,80.0,84.0,85.0,84.0,84.0,71.0,79.0,82.0,null,83.0,83.0,88.0,82.0,88.0,79.0,84.0,86.0,82.0,76.0,85.0,80.0,85.0,85.0,null,28.0,80.0,78.0,83.0,84.0,87.0,87.0,85.0,80.0,78.0,72.0,81.0,83.0,80.0,82.0,82.0,81.0,82.0,84.0,80.0,81.0,82.0,84.0,82.0,null,84.0,88.0,84.0,89.0,81.0,81.0,82.0,84.0,85.0,86.0,89.0,53.0,80.0,78.0,null,3.0,76.0,70.0,82.0,86.0,88.0,92.0,87.0,96.0,96.0,92.0,81.0,89.0,83.0,77.0,81.0,83.0,53.0,null,76.0,83.0,88.0,85.0,85.0,82.0,null,71.0,81.0,79.0,82.0,83.0,82.0,91.0,85.0,85.0,84.0,85.0,81.0,82.0,85.0,84.0,83.0,87.0,90.0,82.0,81.0,83.0,84.0,85.0,84.0,30.0,null,null,null,null,null,null,null,null,null,null,null,null,82.0,82.0,83.0,74.0,79.0,81.0,79.0,79.0,82.0,82.0,47.0,67.0,71.0,22.0,69.0,19.0,72.0,21.0,75.0,79.0,84.0,86.0,82.0,89.0,82.0,83.0,86.0,84.0,86.0,84.0,94.0,80.0,72.0,76.0,64.0,57.0,49.0,null,71.0,80.0,4.0,80.0,77.0,80.0,84.0,84.0,83.0,98.0,94.0,60.0,83.0,79.0,81.0,86.0,82.0,84.0,71.0,82.0,82.0,51.0,58.0,73.0,79.0,81.0,85.0,78.0],"se":[null,83.0,96.0,76.0,95.0,90.0,94.0,96.0,93.0,88.0,92.0,95.0,96.0,94.0,91.0,98.0,94.0,91.0,95.0,95.0,95.0,95.0,93.0,93.0,96.0,96.0,94.0,90.0,91.0,95.0,94.0,96.0,95.0,92.0,98.0,96.0,95.0,92.0,94.0,97.0,95.0,96.0,95.0,95.0,96.0,95.0,98.0,93.0,93.0,97.0,96.0,96.0,95.0,96.0,93.0,92.0,92.0,93.0,91.0,90.0,97.0,92.0,95.0,94.0,85.0,95.0,91.0,96.0,95.0,94.0,91.0,94.0,94.0,94.0,93.0,91.0,92.0,95.0,95.0,91.0,93.0,94.0,87.0,87.0,94.0,94.0,94.0,94.0,null,90.0,93.0,88.0,93.0,null,97.0,94.0,99.0,94.0,99.0,94.0,99.0,94.0,99.0,null,95.0,98.0,98.0,95.0,96.0,87.0,91.0,93.0,90.0,93.0,89.0,91.0,95.0,90.0,84.0,92.0,92.0,91.0,96.0,93.0,95.0,92.0,95.0,95.0,95.0,93.0,88.0,93.0,90.0,89.0,90.0,84.0,95.0,94.0,92.0,93.0,89.0,94.0,93.0,94.0,92.0,90.0,91.0,89.0,94.0,95.0,92.0,92.0,95.0,94.0,90.0,92.0,91.0,87.0,95.0,88.0,88.0,95.0,94.0,91.0,89.0,94.0,95.0,95.0,84.0,94.0,94.0,92.0,98.0,94.0,96.0,93.0,97.0,88.0,92.0,95.0,94.0,90.0,89.0,89.0,97.0,94.0,94.0,89.0,80.0,89.0,96.0,null,92.0,90.0,90.0,91.0,91.0,92.0,91.0,93.0,95.0,96.0,95.0,91.0,96.0,90.0,null,88.0,95.0,94.0,96.0,93.0,90.0,92.0,89.0,89.0,88.0,98.0,96.0,92.0,94.0,91.0,88.0,85.0,93.0,95.0,93.0,94.0,92.0,90.0,95.0,null,93.0,96.0,94.0,95.0,93.0,96.0,96.0,92.0,94.0,90.0,96.0,83.0,95.0,87.0,null,59.0,91.0,83.0,90.0,88.0,88.0,89.0,86.0,90.0,94.0,88.0,89.0,93.0,93.0,91.0,94.0,91.0,92.0,null,88.0,96.0,92.0,89.0,92.0,91.0,null,89.0,93.0,89.0,87.0,94.0,89.0,94.0,89.0,93.0,94.0,91.0,94.0,96.0,92.0,92.0,93.0,92.0,91.0,95.0,91.0,93.0,90.0,90.0,91.0,74.0,null,null,null,null,null,null,null,null,null,null,null,null,94.0,96.0,92.0,88.0,93.0,94.0,89.0,85.0,92.0,92.0,80.0,78.0,78.0,73.0,77.0,55.0,79.0,73.0,91.0,94.0,91.0,87.0,81.0,90.0,92.0,87.0,88.0,87.0,85.0,93.0,92.0,90.0,78.0,84.0,80.0,79.0,79.0,null,84.0,89.0,69.0,93.0,88.0,87.0,94.0,88.0,85.0,90.0,91.0,85.0,92.0,91.0,88.0,92.0,88.0,90.0,90.0,92.0,90.0,97.0,94.0,92.0,92.0,90.0,90.0,86.0],"sw":[null,78.0,59.0,75.0,95.0,79.0,109.0,80.0,97.0,75.0,67.0,90.0,85.0,74.0,108.0,99.0,81.0,103.0,105.0,103.0,85.0,97.0,72.0,75.0,97.0,59.0,86.0,80.0,120.0,88.0,99.0,99.0,85.0,102.0,102.0,99.0,83.0,74.0,101.0,97.0,105.0,75.0,82.0,88.0,77.0,89.0,76.0,102.0,103.0,101.0,102.0,60.0,94.0,86.0,80.0,64.0,115.0,78.0,67.0,67.0,86.0,92.0,70.0,90.0,71.0,80.0,98.0,74.0,95.0,86.0,85.0,96.0,89.0,74.0,92.0,91.0,74.0,79.0,78.0,89.0,89.0,81.0,61.0,82.0,99.0,99.0,99.0,99.0,null,67.0,85.0,116.0,123.0,null,76.0,82.0,134.0,82.0,134.0,82.0,134.0,82.0,134.0,null,56.0,103.0,92.0,83.0,96.0,91.0,74.0,79.0,78.0,97.0,76.0,82.0,86.0,95.0,63.0,91.0,97.0,73.0,123.0,82.0,101.0,79.0,94.0,80.0,70.0,86.0,89.0,69.0,102.0,76.0,104.0,81.0,97.0,62.0,72.0,132.0,48.0,87.0,66.0,57.0,95.0,86.0,77.0,92.0,99.0,44.0,81.0,81.0,94.0,72.0,98.0,54.0,70.0,73.0,104.0,83.0,78.0,82.0,88.0,80.0,87.0,89.0,49.0,108.0,84.0,73.0,107.0,83.0,75.0,65.0,78.0,88.0,93.0,78.0,74.0,80.0,82.0,91.0,86.0,56.0,85.0,72.0,91.0,106.0,52.0,79.0,94.0,null,78.0,96.0,118.0,82.0,94.0,71.0,82.0,70.0,55.0,72.0,79.0,71.0,91.0,83.0,null,77.0,86.0,83.0,83.0,107.0,71.0,70.0,101.0,95.0,74.0,84.0,68.0,73.0,96.0,74.0,97.0,78.0,58.0,89.0,101.0,74.0,95.0,76.0,92.0,null,79.0,62.0,95.0,93.0,97.0,86.0,103.0,86.0,88.0,73.0,70.0,82.0,88.0,67.0,null,81.0,96.0,73.0,102.0,72.0,98.0,64.0,66.0,84.0,82.0,68.0,66.0,95.0,87.0,71.0,94.0,86.0,84.0,null,97.0,87.0,115.0,50.0,68.0,81.0,null,111.0,102.0,109.0,94.0,103.0,94.0,98.0,85.0,79.0,80.0,85.0,83.0,93.0,99.0,77.0,80.0,92.0,122.0,85.0,128.0,112.0,123.0,89.0,99.0,93.0,null,null,null,null,null,null,null,null,null,null,null,null,66.0,84.0,114.0,114.0,91.0,98.0,67.0,85.0,60.0,64.0,43.0,70.0,99.0,41.0,92.0,34.0,91.0,73.0,85.0,104.0,90.0,102.0,81.0,79.0,96.0,77.0,86.0,80.0,83.0,75.0,86.0,83.0,69.0,89.0,64.0,73.0,69.0,null,88.0,130.0,78.0,119.0,72.0,115.0,86.0,117.0,80.0,83.0,87.0,70.0,87.0,75.0,84.0,91.0,93.0,80.0,67.0,73.0,81.0,28.0,70.0,87.0,100.0,98.0,105.0,78.0],"sr":[null,131.0,150.0,117.0,171.0,116.0,151.0,146.0,169.0,142.0,118.0,62.0,70.0,50.0,71.0,128.0,160.0,115.0,124.0,134.0,113.0,134.0,162.0,119.0,120.0,107.0,118.0,107.0,133.0,150.0,91.0,113.0,101.0,132.0,56.0,154.0,161.0,130.0,107.0,129.0,142.0,135.0,125.0,152.0,103.0,123.0,127.0,146.0,138.0,122.0,174.0,83.0,125.0,104.0,184.0,157.0,110.0,221.0,107.0,101.0,126.0,189.0,92.0,156.0,127.0,129.0,101.0,99.0,158.0,75.0,130.0,146.0,138.0,82.0,116.0,85.0,123.0,113.0,182.0,96.0,109.0,142.0,104.0,102.0,224.0,224.0,224.0,224.0,null,162.0,128.0,134.0,136.0,null,102.0,71.0,108.0,71.0,108.0,71.0,108.0,71.0,108.0,null,93.0,96.0,104.0,113.0,151.0,125.0,70.0,70.0,97.0,80.0,151.0,86.0,158.0,111.0,79.0,101.0,86.0,124.0,153.0,138.0,128.0,140.0,161.0,88.0,112.0,138.0,90.0,144.0,104.0,119.0,124.0,162.0,148.0,98.0,81.0,126.0,115.0,86.0,145.0,84.0,185.0,93.0,90.0,73.0,133.0,109.0,100.0,148.0,158.0,143.0,121.0,130.0,167.0,72.0,201.0,145.0,61.0,180.0,131.0,127.0,175.0,162.0,87.0,129.0,108.0,86.0,108.0,85.0,119.0,90.0,70.0,100.0,49.0,101.0,110.0,116.0,78.0,221.0,114.0,116.0,125.0,149.0,217.0,169.0,124.0,175.0,102.0,null,148.0,172.0,173.0,128.0,150.0,106.0,156.0,120.0,139.0,104.0,158.0,86.0,105.0,149.0,null,96.0,152.0,112.0,125.0,124.0,145.0,124.0,170.0,142.0,108.0,80.0,147.0,147.0,185.0,145.0,215.0,160.0,115.0,112.0,141.0,97.0,152.0,121.0,84.0,null,126.0,113.0,167.0,112.0,133.0,108.0,109.0,115.0,148.0,158.0,142.0,59.0,148.0,155.0,null,35.0,122.0,75.0,98.0,72.0,76.0,38.0,64.0,106.0,101.0,70.0,39.0,95.0,83.0,58.0,82.0,116.0,28.0,null,82.0,112.0,166.0,107.0,146.0,158.0,null,169.0,190.0,103.0,132.0,134.0,143.0,140.0,124.0,158.0,112.0,116.0,176.0,114.0,124.0,111.0,151.0,161.0,160.0,123.0,196.0,102.0,132.0,168.0,152.0,134.0,null,null,null,null,null,null,null,null,null,null,null,null,116.0,125.0,75.0,87.0,79.0,64.0,64.0,87.0,100.0,93.0,87.0,131.0,177.0,103.0,172.0,82.0,179.0,38.0,155.0,142.0,92.0,43.0,67.0,140.0,90.0,36.0,47.0,64.0,145.0,80.0,84.0,138.0,91.0,118.0,82.0,131.0,141.0,null,218.0,150.0,62.0,237.0,126.0,164.0,172.0,152.0,174.0,178.0,185.0,144.0,224.0,119.0,146.0,212.0,142.0,166.0,118.0,160.0,154.0,44.0,83.0,85.0,106.0,68.0,43.0,74.0],"rp":[null,43.0,45.0,38.0,59.0,40.0,53.0,45.0,44.0,37.0,35.0,30.0,30.0,27.0,39.0,47.0,50.0,44.0,52.0,50.0,42.0,50.0,45.0,45.0,50.0,48.0,34.0,45.0,51.0,57.0,34.0,43.0,41.0,46.0,34.0,54.0,47.0,42.0,43.0,51.0,57.0,44.0,45.0,45.0,36.0,46.0,43.0,49.0,48.0,39.0,48.0,38.0,48.0,41.0,44.0,35.0,50.0,45.0,32.0,36.0,45.0,51.0,37.0,51.0,32.0,48.0,45.0,39.0,51.0,38.0,44.0,48.0,42.0,40.0,45.0,39.0,43.0,40.0,43.0,46.0,46.0,44.0,39.0,43.0,41.0,41.0,41.0,41.0,null,44.0,58.0,50.0,47.0,null,45.0,36.0,57.0,36.0,57.0,36.0,57.0,36.0,57.0,null,33.0,47.0,44.0,42.0,53.0,40.0,31.0,30.0,39.0,43.0,42.0,43.0,52.0,36.0,35.0,44.0,46.0,42.0,53.0,48.0,49.0,42.0,52.0,37.0,45.0,41.0,36.0,42.0,45.0,45.0,51.0,43.0,49.0,37.0,45.0,42.0,36.0,44.0,39.0,33.0,49.0,43.0,40.0,42.0,46.0,37.0,39.0,43.0,52.0,50.0,45.0,43.0,47.0,41.0,51.0,41.0,40.0,49.0,50.0,48.0,50.0,44.0,37.0,51.0,41.0,35.0,44.0,36.0,48.0,31.0,34.0,43.0,38.0,42.0,40.0,37.0,47.0,51.0,40.0,41.0,48.0,52.0,54.0,44.0,39.0,50.0,47.0,null,48.0,49.0,48.0,49.0,46.0,43.0,48.0,43.0,44.0,48.0,50.0,38.0,47.0,50.0,null,50.0,46.0,48.0,42.0,53.0,39.0,44.0,51.0,48.0,40.0,49.0,49.0,44.0,48.0,53.0,46.0,44.0,38.0,45.0,58.0,44.0,45.0,42.0,40.0,null,45.0,40.0,43.0,42.0,57.0,41.0,51.0,48.0,53.0,46.0,45.0,40.0,51.0,47.0,null,31.0,38.0,33.0,30.0,24.0,30.0,17.0,22.0,31.0,30.0,22.0,22.0,38.0,39.0,26.0,40.0,33.0,44.0,null,39.0,42.0,57.0,34.0,46.0,58.0,null,57.0,54.0,50.0,39.0,51.0,47.0,43.0,47.0,50.0,44.0,46.0,46.0,49.0,48.0,41.0,43.0,53.0,57.0,52.0,60.0,50.0,55.0,53.0,57.0,50.0,null,null,null,null,null,null,null,null,null,null,null,null,39.0,47.0,36.0,41.0,39.0,37.0,29.0,34.0,34.0,39.0,36.0,43.0,48.0,44.0,50.0,28.0,46.0,39.0,40.0,52.0,29.0,25.0,26.0,36.0,32.0,22.0,25.0,22.0,37.0,35.0,30.0,37.0,32.0,47.0,34.0,50.0,51.0,null,58.0,52.0,52.0,58.0,46.0,50.0,55.0,44.0,48.0,46.0,50.0,54.0,55.0,42.0,44.0,52.0,50.0,45.0,50.0,52.0,44.0,24.0,45.0,36.0,38.0,35.0,32.0,22.0],"wh":[null,11.77,11.58,11.52,10.98,11.0,11.53,10.85,13.7,12.78,11.82,11.62,11.48,11.68,11.35,12.77,12.03,11.63,11.17,11.25,11.35,10.93,12.72,11.57,10.62,9.98,12.48,10.1,11.18,10.83,13.25,12.35,10.75,11.05,11.73,11.1,12.95,10.48,12.05,10.93,11.23,11.28,11.23,12.57,13.13,11.23,11.42,11.18,12.27,13.88,13.97,10.15,10.73,11.23,13.9,14.13,12.47,16.05,13.0,10.72,11.03,12.85,11.05,11.32,14.53,13.28,10.97,11.1,13.15,11.22,12.1,12.65,13.38,11.12,11.03,11.27,11.2,11.43,14.2,11.1,10.9,11.03,10.37,10.6,7.3,7.3,7.3,7.3,null,6.4,5.32,6.87,7.87,null,7.2,7.13,5.12,7.13,5.12,7.13,5.12,7.13,5.12,null,10.1,10.98,12.12,11.38,12.67,13.92,10.7,11.18,11.05,11.25,13.02,11.18,11.62,13.57,10.95,11.35,11.2,10.35,12.37,11.4,11.4,12.52,11.08,11.05,11.27,12.87,13.25,12.97,11.08,10.85,11.52,13.03,12.55,11.63,11.22,14.4,10.98,11.35,13.2,10.97,14.07,11.7,10.78,9.78,13.02,10.7,10.98,13.55,14.2,11.22,11.13,10.65,11.42,11.13,13.18,13.68,8.7,11.42,10.92,10.55,12.4,14.18,12.38,10.98,11.12,11.03,12.3,11.08,10.93,11.95,11.02,11.03,11.17,11.02,11.18,13.08,9.4,14.47,11.8,10.98,10.88,11.22,13.47,14.83,11.0,10.85,10.35,null,11.65,13.33,13.97,10.85,12.93,11.33,11.53,11.32,12.25,12.07,12.18,12.27,12.17,12.32,null,14.22,13.38,12.37,12.87,12.2,13.52,12.18,13.7,14.1,11.92,9.77,12.28,12.12,15.3,12.12,15.2,14.88,12.27,12.43,13.25,12.02,15.22,13.57,12.45,null,12.48,12.53,15.5,13.85,13.82,12.48,11.95,12.2,12.48,12.82,12.65,13.57,12.13,12.28,null,9.38,13.67,12.93,14.63,14.43,14.88,13.93,14.9,15.2,15.27,15.13,12.67,13.13,11.87,15.75,12.38,13.9,9.68,null,12.28,12.03,12.17,12.25,12.72,11.97,null,10.95,12.63,12.05,12.4,12.92,13.97,13.8,12.45,12.07,11.47,11.8,14.82,12.98,13.17,12.43,12.33,12.27,12.4,11.83,14.75,12.22,12.25,12.42,11.75,14.97,null,null,null,null,null,null,null,null,null,null,null,null,11.85,11.98,13.55,15.33,14.9,13.35,12.9,13.92,12.68,13.27,14.17,14.12,13.9,10.77,13.4,12.08,13.62,10.03,11.0,11.37,12.6,12.48,11.98,13.37,14.13,12.13,12.15,13.87,13.3,11.98,12.38,15.72,14.42,12.85,12.73,12.92,14.27,null,14.33,14.55,9.67,14.08,11.65,14.18,13.22,14.95,14.42,14.63,14.17,14.27,14.78,12.35,13.2,14.65,12.32,14.9,12.92,12.67,14.17,14.58,10.23,10.88,11.47,11.45,11.05,14.87]},"workouts":{"d":["2026-04-21","2026-04-17","2026-03-28","2026-03-27","2026-03-27","2026-03-26","2026-03-26","2026-03-26","2026-03-26","2026-03-25","2026-03-24","2026-03-24","2026-03-23","2026-03-21","2026-03-16","2026-03-12","2026-03-09","2026-03-09","2026-03-07","2026-03-07","2026-03-07","2026-03-06","2026-03-05","2026-03-05","2026-03-05","2026-03-04","2026-03-03","2026-03-03","2026-03-01","2026-02-28","2026-02-28","2026-02-22","2026-02-22","2026-02-22","2026-02-21","2026-02-20","2026-02-20","2026-02-20","2026-02-19","2026-02-18","2026-02-06","2026-02-06","2026-02-05","2026-02-05","2026-02-05","2026-02-05","2026-02-04","2026-02-04","2026-02-04","2026-01-31","2026-01-29","2026-01-28","2026-01-28","2026-01-26","2026-01-14","2026-01-14","2026-01-12","2026-01-10","2026-01-10","2026-01-08","2025-12-26","2025-12-26","2025-12-17","2025-12-16","2025-12-16","2025-12-15","2025-12-14","2025-12-10","2025-12-09","2025-12-06","2025-12-01","2025-11-25","2025-11-25","2025-11-22","2025-11-22","2025-11-22","2025-11-13","2025-11-10","2025-11-10","2025-11-08","2025-11-07","2025-11-01","2025-10-28","2025-10-27","2025-10-27","2025-10-25","2025-10-25","2025-10-20","2025-10-18","2025-10-18","2025-10-13","2025-10-13","2025-10-10","2025-10-10","2025-10-08","2025-10-05","2025-10-05","2025-10-02","2025-10-01","2025-09-29","2025-09-29","2025-09-28","2025-09-26","2025-09-26","2025-09-24","2025-09-24","2025-09-22","2025-09-22","2025-09-20","2025-09-20","2025-09-20","2025-09-19","2025-09-17","2025-09-15","2025-09-15","2025-09-12","2025-09-12","2025-09-10","2025-09-10","2025-09-10","2025-09-08","2025-09-08","2025-09-08","2025-09-04","2025-09-04","2025-09-03","2025-08-30","2025-08-30","2025-08-29","2025-08-29","2025-08-27","2025-08-27","2025-08-27","2025-08-27","2025-08-25","2025-08-25","2025-08-22","2025-08-22","2025-08-20","2025-08-20","2025-08-20","2025-08-19","2025-08-19","2025-08-17","2025-08-15","2025-08-15","2025-08-13","2025-08-13","2025-08-13","2025-08-13","2025-08-11","2025-08-09","2025-08-09","2025-08-07","2025-08-06","2025-08-06","2025-08-06","2025-08-04","2025-08-04","2025-08-04","2025-08-03","2025-07-30","2025-07-30","2025-07-30","2025-07-30","2025-07-28","2025-07-28","2025-07-27","2025-07-22","2025-07-21","2025-07-19","2025-07-16","2025-07-16","2025-07-15","2025-07-14","2025-07-14","2025-07-11","2025-07-11","2025-07-10","2025-07-10","2025-07-08","2025-07-08","2025-07-07","2025-07-07","2025-07-04","2025-07-02","2025-07-02","2025-07-02","2025-07-01","2025-07-01","2025-06-30","2025-06-30","2025-06-27","2025-06-27","2025-06-27","2025-06-25","2025-06-25","2025-06-24","2025-06-23","2025-06-20","2025-06-19","2025-06-18","2025-06-18","2025-06-18","2025-06-18","2025-06-17","2025-06-15","2025-06-13","2025-06-11","2025-06-10","2025-06-09","2025-06-07","2025-06-01","2025-06-01","2025-05-31","2025-05-31","2025-05-29","2025-05-29","2025-05-28","2025-05-28","2026-04-17","2026-04-17","2026-04-15","2026-04-15","2026-04-14","2026-04-13","2026-04-12","2026-04-12","2026-04-10","2026-04-10","2026-04-09","2026-04-08","2026-04-07","2026-04-07","2026-04-06","2026-04-06","2026-04-04","2026-04-04","2026-04-02","2026-04-01","2026-03-31","2026-03-31","2026-03-30","2026-03-30","2026-03-30","2025-05-28","2025-05-28","2025-05-28","2025-05-13","2025-07-02","2025-05-27","2025-05-26","2025-05-26","2025-05-25","2025-05-25","2025-05-23","2025-05-23","2025-05-22","2025-05-19","2025-05-19","2025-05-18","2025-05-18","2025-05-17","2025-05-15","2025-05-11","2025-05-08","2025-05-06","2025-05-05","2025-05-05","2025-05-05","2025-05-01","2025-04-29","2025-04-28"],"sp":["Activity","Weightlifting","Swimming","Golf","Golf","Golf","Weightlifting","Running","Pickleball","Golf","Weightlifting","Running","Golf","Walking","Walking","Walking","Activity","Activity","Golf","Golf","Golf","Pickleball","Weightlifting","Running","Golf","Golf","Weightlifting","Running","Activity","Weightlifting","Walking","Golf","Golf","Golf","Golf","Weightlifting","Running","Walking","Golf","Golf","Walking","Walking","Walking","Walking","Activity","Activity","Walking","Activity","Activity","Golf","Activity","Activity","Field Hockey","Golf","Walking","Walking","Walking","Walking","Walking","Hiking/Rucking","Weightlifting","Walking","Activity","Walking","Walking","Walking","Walking","Walking","Walking","Running","Activity","Activity","Walking","Weightlifting","Walking","Activity","Walking","Activity","Walking","Hiking/Rucking","Walking","Walking","Walking","Weightlifting","Walking","Walking","Soccer","Running","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Soccer","Walking","Running","Golf","Running","Weightlifting","Walking","Cycling","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Walking","Soccer","Running","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Soccer","Weightlifting","Walking","Running","Weightlifting","Walking","Soccer","Cycling","Running","Weightlifting","Walking","Weightlifting","Walking","Walking","Walking","Weightlifting","Walking","Weightlifting","Walking","Walking","Walking","Soccer","Walking","Walking","Walking","Weightlifting","Walking","Weightlifting","Walking","Soccer","Walking","Running","Weightlifting","Walking","Running","Weightlifting","Walking","Soccer","Weightlifting","Running","Walking","Walking","Running","Walking","Walking","Soccer","Running","Walking","Walking","Walking","Walking","Walking","Walking","Walking","Walking","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Weightlifting","Walking","Running","Weightlifting","Walking","Soccer","Walking","Golf","Weightlifting","Running","Weightlifting","Running","Walking","Weightlifting","Running","Walking","Running","Soccer","Walking","Weightlifting","Running","Walking","Cycling","Running","Soccer","Soccer","Running","Walking","Running","Walking","Walking","Walking","Walking","Walking","Walking","Walking","Weightlifting","Running","Running","Golf","Weightlifting","Running","Golf","Running","Weightlifting","Running","Weightlifting","Running","Golf","Walking","Weightlifting","Running","Weightlifting","Running","Weightlifting","Running","Golf","Running","Golf","Golf","Walking","Weightlifting","Running","Walking","Cycling","Walking","Activity","Running","Walking","Walking","Walking","Walking","Dog Walking","Walking","Walking","Walking","Walking","Walking","Walking","Walking","Walking","Walking","Dog Walking","Soccer","Unknown (123)","Running","Walking","Cycling","Activity","Activity","Activity"],"st":[5.51,11.91,6.02,5.36,5.66,8.56,14.94,10.74,12.05,6.71,13.73,9.0,5.64,5.05,5.63,5.2,7.77,5.5,7.53,6.7,6.87,13.53,16.46,10.95,8.73,6.1,13.05,13.02,6.58,12.2,6.43,5.16,5.19,9.46,6.48,12.84,12.27,7.06,5.12,6.88,5.03,6.07,5.6,5.9,11.96,7.25,6.57,5.89,5.36,5.84,6.71,5.65,5.32,7.4,5.21,5.54,5.46,5.15,6.08,7.3,6.05,6.92,5.23,10.33,5.43,5.52,5.73,5.85,5.35,12.88,7.66,6.24,6.55,12.67,9.14,5.41,7.06,6.09,6.02,5.58,5.33,6.15,6.1,14.46,9.46,6.58,17.28,13.74,10.8,9.18,11.67,10.21,5.81,8.42,13.86,5.09,11.89,9.49,13.11,14.35,6.7,6.4,15.08,10.73,11.17,7.67,5.21,8.72,13.98,9.79,5.38,11.65,14.18,14.52,7.99,13.87,6.73,11.01,10.02,11.99,6.39,6.92,11.35,14.69,12.69,15.36,6.37,14.24,10.59,8.04,7.16,8.22,5.02,7.24,14.4,10.18,10.15,11.08,6.76,6.25,13.71,5.01,5.24,5.13,6.05,7.75,5.22,8.56,9.06,5.19,12.98,8.89,9.72,11.69,5.68,7.28,13.51,7.87,12.95,7.1,5.56,13.88,10.6,6.64,14.11,13.12,5.54,5.82,5.75,6.57,5.23,5.24,5.12,9.34,7.17,11.24,5.72,8.82,13.67,9.43,8.47,9.79,6.75,11.21,13.26,8.1,6.6,12.63,5.04,6.15,7.41,12.82,6.9,12.59,5.03,10.22,13.6,5.11,12.8,11.51,5.74,6.48,12.83,8.95,7.71,14.64,17.26,16.51,10.2,5.49,12.54,5.55,5.26,5.19,5.07,5.4,5.54,5.16,8.16,13.01,11.17,5.12,12.7,11.94,6.99,11.84,7.22,11.19,15.29,12.48,13.59,5.48,13.17,13.11,7.06,11.9,13.51,11.44,10.96,9.57,6.77,6.02,5.3,8.86,12.56,6.07,5.99,6.83,9.03,14.59,6.21,5.94,7.65,6.03,6.18,7.57,7.25,10.26,5.18,5.69,5.32,5.26,6.8,5.95,6.92,14.01,8.72,12.97,7.07,6.88,11.01,16.23,6.5],"mn":[13.0,58.0,24.0,33.0,37.0,87.0,80.0,15.0,56.0,31.0,60.0,15.0,30.0,13.0,19.0,15.0,34.0,22.0,55.0,57.0,51.0,163.0,81.0,15.0,92.0,25.0,35.0,15.0,18.0,59.0,15.0,25.0,22.0,99.0,61.0,78.0,15.0,15.0,25.0,31.0,19.0,64.0,21.0,40.0,115.0,25.0,54.0,28.0,28.0,28.0,33.0,24.0,16.0,55.0,21.0,21.0,28.0,21.0,22.0,34.0,44.0,30.0,19.0,39.0,16.0,21.0,24.0,22.0,21.0,32.0,25.0,27.0,24.0,110.0,30.0,21.0,47.0,18.0,22.0,22.0,24.0,24.0,37.0,66.0,30.0,39.0,80.0,28.0,53.0,30.0,73.0,30.0,66.0,30.0,52.0,21.0,24.0,280.0,27.0,65.0,30.0,32.0,74.0,30.0,69.0,30.0,39.0,32.0,73.0,30.0,36.0,63.0,25.0,69.0,30.0,73.0,30.0,91.0,30.0,84.0,47.0,30.0,24.0,92.0,30.0,59.0,27.0,22.0,90.0,30.0,62.0,30.0,15.0,33.0,66.0,30.0,90.0,30.0,25.0,28.0,63.0,16.0,30.0,22.0,74.0,30.0,54.0,30.0,51.0,28.0,19.0,75.0,30.0,19.0,99.0,30.0,73.0,48.0,15.0,16.0,18.0,21.0,22.0,37.0,94.0,28.0,36.0,24.0,22.0,48.0,18.0,24.0,16.0,30.0,61.0,30.0,72.0,30.0,80.0,30.0,64.0,30.0,69.0,30.0,27.0,86.0,48.0,87.0,21.0,52.0,54.0,20.0,68.0,26.0,18.0,68.0,27.0,22.0,22.0,79.0,33.0,32.0,15.0,15.0,15.0,28.0,100.0,98.0,18.0,36.0,24.0,31.0,21.0,24.0,27.0,27.0,15.0,16.0,70.0,15.0,20.0,18.0,66.0,20.0,64.0,20.0,16.0,20.0,73.0,20.0,273.0,13.0,44.0,20.0,22.0,20.0,72.0,20.0,286.0,20.0,28.0,30.0,16.0,20.0,20.0,11.0,15.0,51.0,63.0,27.0,31.0,54.0,49.0,37.0,53.0,49.0,33.0,88.0,30.0,34.0,25.0,18.0,49.0,39.0,64.0,99.0,35.0,15.0,15.0,21.0,77.0,112.0,45.0],"hr":[138,124,128,113,115,119,140,167,143,129,141,155,119,127,131,130,137,126,124,119,122,129,151,169,121,130,153,182,141,130,139,119,116,124,117,121,177,146,118,131,122,112,127,119,129,136,118,124,120,125,128,127,130,125,120,126,119,120,128,130,111,129,121,142,128,125,123,126,120,159,140,128,131,111,138,121,121,135,125,123,119,126,116,119,142,116,156,168,114,141,113,145,104,137,144,116,158,102,163,108,126,122,118,146,107,131,106,137,101,145,111,130,172,107,137,105,127,104,147,128,99,129,158,119,159,153,127,173,102,133,104,131,118,124,117,142,100,145,129,121,136,118,103,113,101,132,103,135,120,110,168,103,144,162,103,130,135,125,177,138,126,171,149,120,133,161,114,124,121,114,115,114,120,139,113,145,102,138,116,136,120,140,111,149,162,112,114,130,113,108,119,166,111,157,116,128,164,113,162,128,116,122,175,154,148,168,141,142,152,112,161,115,119,113,108,115,127,120,118,177,164,126,136,168,121,168,143,164,127,171,122,138,143,173,137,167,136,165,110,156,133,125,127,149,170,140,133,115,126,169,120,107,122,115,110,119,127,120,109,111,115,121,117,115,116,131,123,178,145,137,127,138,118],"kc":[109,284,161,120,148,421,742,225,557,221,571,187,143,87,130,94,271,125,298,244,243,1077,917,229,440,167,414,271,162,404,133,104,96,522,229,348,258,151,101,212,93,206,126,168,731,204,227,153,125,159,207,141,108,302,105,127,132,97,143,245,141,203,100,380,110,124,135,143,110,427,233,181,176,348,268,109,256,146,141,129,118,155,184,339,300,212,1037,437,232,297,305,320,176,273,553,95,320,633,388,199,205,189,380,327,212,242,118,290,168,317,128,481,402,180,264,182,200,209,327,580,91,217,314,467,404,712,186,364,205,252,174,240,79,218,337,308,173,328,189,166,560,84,110,94,201,239,122,264,292,110,299,175,307,270,190,214,602,294,261,138,112,337,255,198,736,388,136,144,126,212,81,104,92,282,246,324,180,277,379,265,354,291,244,344,387,347,215,666,88,192,289,304,248,353,86,489,394,91,316,560,152,191,258,191,171,434,988,963,220,131,340,137,106,101,93,118,106,92,350,263,281,98,501,298,276,296,149,280,404,311,1249,107,404,319,177,295,568,283,780,247,210,176,102,221,312,110,123,240,396,420,169,179,295,172,197,274,232,510,102,144,114,103,244,164,260,724,186,262,155,175,503,963,212],"z":[3,2,2,1,1,2,3,4,3,2,3,3,2,2,2,2,2,2,2,2,2,2,3,4,2,2,3,5,3,2,3,2,1,2,1,2,5,3,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,2,2,3,2,2,2,2,2,4,3,2,2,1,3,2,2,2,2,2,2,2,1,2,3,1,3,4,1,3,1,3,1,2,3,1,4,1,4,1,2,2,2,3,1,2,1,2,1,3,1,2,4,1,2,1,2,1,3,2,1,2,4,2,4,3,2,4,1,2,1,2,2,2,1,3,1,3,2,2,2,2,1,1,1,2,1,2,2,1,4,1,3,4,1,2,2,2,5,3,2,4,3,2,2,4,1,2,2,1,1,1,2,3,1,3,1,3,1,2,2,3,1,3,4,1,1,2,1,1,2,4,1,4,1,2,4,1,4,2,1,2,4,3,3,4,3,3,3,1,4,1,2,1,1,1,2,2,2,5,4,2,2,4,2,4,3,4,2,4,2,3,3,4,2,4,2,4,1,3,2,2,2,3,4,3,2,1,2,4,2,1,2,1,1,2,2,2,1,1,1,2,1,1,1,2,2,5,3,2,2,3,2]}}</script>
+<script>
+(function() {
+  const DATA = JSON.parse(document.getElementById('vital-data').textContent);
+  const D = DATA.daily;
+  const META = DATA.meta;
+
+  const C = {
+    ink: '#1c1d24',
+    muted: '#6b6256',
+    line: 'rgba(28,29,36,0.10)',
+    navy: '#1f3a5f',
+    sage: '#5a8a6b',
+    sageDeep: '#426650',
+    terracotta: '#b85c38',
+    terracottaSoft: '#d28a6c',
+    gold: '#c89f3c',
+    plum: '#6e3a5c',
+  };
+
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = C.muted;
+  Chart.defaults.borderColor = C.line;
+  Chart.defaults.scale.grid.color = 'rgba(28,29,36,0.05)';
+  Chart.defaults.scale.grid.drawTicks = false;
+  Chart.defaults.scale.border = { display: false };
+
+  const ALL_DATES = D.d;
+  const FIRST = ALL_DATES[0];
+  const LAST = ALL_DATES[ALL_DATES.length - 1];
+
+  let state = {
+    fromDate: FIRST,
+    toDate: LAST,
+    presetRange: 365,
+  };
+  const charts = {};
+
+  const fmt = (v, d=0) => v == null || isNaN(v) ? '—' :
+    Number(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const fmtDate = s => {
+    const dt = new Date(s + 'T00:00:00Z');
+    return dt.toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).replace('.', '');
+  };
+  const fmtMonth = s => {
+    const dt = new Date(s + 'T00:00:00Z');
+    return dt.toLocaleDateString('es-MX', { month: 'short', year: '2-digit', timeZone: 'UTC' }).replace('.', '');
+  };
+
+  function rolling(arr, win) {
+    const out = new Array(arr.length).fill(null);
+    for (let i = 0; i < arr.length; i++) {
+      const lo = Math.max(0, i - win + 1);
+      const slice = arr.slice(lo, i+1).filter(v => v != null && !isNaN(v));
+      if (slice.length >= Math.min(3, win)) {
+        out[i] = slice.reduce((a,b) => a+b, 0) / slice.length;
+      }
+    }
+    return out;
+  }
+
+  function mean(arr) {
+    const v = arr.filter(x => x != null && !isNaN(x));
+    return v.length ? v.reduce((a,b)=>a+b, 0) / v.length : null;
+  }
+  function median(arr) {
+    const v = arr.filter(x => x != null && !isNaN(x)).sort((a,b)=>a-b);
+    if (!v.length) return null;
+    const m = Math.floor(v.length/2);
+    return v.length % 2 ? v[m] : (v[m-1]+v[m])/2;
+  }
+  function minOf(arr) { const v = arr.filter(x => x != null && !isNaN(x)); return v.length ? Math.min(...v) : null; }
+  function maxOf(arr) { const v = arr.filter(x => x != null && !isNaN(x)); return v.length ? Math.max(...v) : null; }
+
+  function trendDirection(arr) {
+    const half = Math.floor(arr.length / 2);
+    const m1 = mean(arr.slice(0, half));
+    const m2 = mean(arr.slice(half));
+    if (m1 == null || m2 == null) return { dir: 'flat', pct: 0 };
+    const pct = ((m2 - m1) / Math.abs(m1)) * 100;
+    if (Math.abs(pct) < 3) return { dir: 'flat', pct };
+    return { dir: pct > 0 ? 'up' : 'down', pct };
+  }
+
+  function getFiltered() {
+    let startIdx = ALL_DATES.indexOf(state.fromDate);
+    let endIdx = ALL_DATES.indexOf(state.toDate);
+    if (startIdx < 0) startIdx = 0;
+    if (endIdx < 0) endIdx = ALL_DATES.length - 1;
+    if (startIdx > endIdx) [startIdx, endIdx] = [endIdx, startIdx];
+    const slice = arr => arr.slice(startIdx, endIdx + 1);
+    return {
+      d: slice(D.d),
+      st: slice(D.st), kc: slice(D.kc), wk: slice(D.wk), rm: slice(D.rm), ac: slice(D.ac),
+      rs: slice(D.rs), hv: slice(D.hv), hr: slice(D.hr), so: slice(D.so),
+      sk: slice(D.sk), sd: slice(D.sd), as: slice(D.as),
+      sl: slice(D.sl), sp: slice(D.sp), se: slice(D.se),
+      sw: slice(D.sw), sr: slice(D.sr), rp: slice(D.rp), wh: slice(D.wh),
+    };
+  }
+
+  function lineChart(canvasId, labels, datasets, opts={}) {
+    const ctx = document.getElementById(canvasId);
+    if (charts[canvasId]) charts[canvasId].destroy();
+    charts[canvasId] = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 400 },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1d24',
+            titleColor: '#fbf6ec',
+            bodyColor: '#fbf6ec',
+            borderColor: 'transparent',
+            padding: 10,
+            displayColors: false,
+            titleFont: { family: "'JetBrains Mono', monospace", size: 10, weight: '500' },
+            bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+            callbacks: {
+              title: (items) => items[0] ? fmtDate(items[0].label) : '',
+              label: (ctx) => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, ctx.dataset.fmtDigits ?? 1),
+            },
+          },
+        },
+        scales: {
+          x: {
+            type: 'category',
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 8,
+              callback: function(v) { return fmtMonth(this.getLabelForValue(v)); },
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
+            },
+            grid: { display: false },
+          },
+          y: {
+            ticks: {
+              font: { size: 10, family: "'JetBrains Mono', monospace" },
+              padding: 6,
+              ...(opts.yTickCallback ? { callback: opts.yTickCallback } : {}),
+            },
+            grid: { color: 'rgba(28,29,36,0.05)' },
+            ...(opts.yScale || {}),
+          },
+        },
+      },
+    });
+  }
+
+  function renderHeader(f) {
+    document.getElementById('period-text').textContent = fmtDate(f.d[0]) + ' → ' + fmtDate(f.d[f.d.length-1]);
+    document.getElementById('period-days').textContent = f.d.length + ' días';
+    document.getElementById('gendate').textContent = META.gen;
+    document.getElementById('foot-date').textContent = 'Generado ' + META.gen;
+    document.getElementById('range-info').textContent = f.d.length + ' días seleccionados';
+  }
+
+  function renderKPIs(f) {
+    const recAvg = mean(f.rs);
+    const hrvAvg = mean(f.hv);
+    const rhrAvg = mean(f.hr);
+    const slAvg = mean(f.sl);
+    const spo2Avg = mean(f.so);
+
+    function trendIcon(t, invert=false) {
+      const cls = (t.dir === 'flat') ? 'flat' :
+        ((t.dir === 'up') ? (invert ? 'down' : 'up') : (invert ? 'up' : 'down'));
+      const arrow = t.dir === 'flat' ? '→' : (t.dir === 'up' ? '↑' : '↓');
+      return `<div class="kpi-trend ${cls}">${arrow} ${fmt(Math.abs(t.pct), 1)}% vs periodo anterior</div>`;
+    }
+
+    document.getElementById('kpi-row').innerHTML = `
+      <div class="kpi">
+        <div class="kpi-label">Recuperación</div>
+        <div class="kpi-value">${fmt(recAvg, 0)}<span class="kpi-unit">%</span></div>
+        ${trendIcon(trendDirection(f.rs))}
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">VFC</div>
+        <div class="kpi-value">${fmt(hrvAvg, 1)}<span class="kpi-unit">ms</span></div>
+        ${trendIcon(trendDirection(f.hv))}
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">FC en Reposo</div>
+        <div class="kpi-value">${fmt(rhrAvg, 0)}<span class="kpi-unit">lpm</span></div>
+        ${trendIcon(trendDirection(f.hr), true)}
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">SpO₂</div>
+        <div class="kpi-value">${fmt(spo2Avg, 1)}<span class="kpi-unit">%</span></div>
+        ${trendIcon(trendDirection(f.so))}
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Sueño</div>
+        <div class="kpi-value">${fmt(slAvg/60, 1)}<span class="kpi-unit">hr</span></div>
+        ${trendIcon(trendDirection(f.sl))}
+      </div>
+    `;
+  }
+
+  function renderAutonomic(f) {
+    const recCtx = document.getElementById('ch-recovery');
+    if (charts['ch-recovery']) charts['ch-recovery'].destroy();
+    const recoveryZones = {
+      id: 'recoveryZones',
+      beforeDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!chartArea) return;
+        const x0 = chartArea.left, x1 = chartArea.right;
+        ctx.save();
+        ctx.fillStyle = 'rgba(184, 92, 56, 0.08)';
+        ctx.fillRect(x0, scales.y.getPixelForValue(33), x1-x0, scales.y.getPixelForValue(0)-scales.y.getPixelForValue(33));
+        ctx.fillStyle = 'rgba(200, 159, 60, 0.07)';
+        ctx.fillRect(x0, scales.y.getPixelForValue(67), x1-x0, scales.y.getPixelForValue(33)-scales.y.getPixelForValue(67));
+        ctx.fillStyle = 'rgba(90, 138, 107, 0.10)';
+        ctx.fillRect(x0, scales.y.getPixelForValue(100), x1-x0, scales.y.getPixelForValue(67)-scales.y.getPixelForValue(100));
+        ctx.restore();
+      }
+    };
+    charts['ch-recovery'] = new Chart(recCtx, {
+      type: 'line',
+      data: {
+        labels: f.d,
+        datasets: [
+          { label: 'Diario', data: f.rs, borderColor: 'transparent', backgroundColor: 'rgba(28,29,36,0.30)', pointRadius: 1.4, showLine: false, fmtDigits: 0 },
+          { label: '14 días', data: rolling(f.rs, 14), borderColor: C.terracotta, borderWidth: 2, pointRadius: 0, tension: 0.25, fmtDigits: 1 },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 400 },
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1d24',
+            titleColor: '#fbf6ec',
+            bodyColor: '#fbf6ec',
+            borderColor: 'transparent',
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              title: (items) => items[0] ? fmtDate(items[0].label) : '',
+              label: (ctx) => ctx.dataset.label + ': ' + fmt(ctx.parsed.y, ctx.dataset.fmtDigits ?? 0) + '%',
+            },
+          },
+        },
+        scales: {
+          x: { type: 'category', ticks: { autoSkip: true, maxTicksLimit: 8, callback: function(v) { return fmtMonth(this.getLabelForValue(v)); }, font: { size: 10, family: "'JetBrains Mono', monospace" } }, grid: { display: false } },
+          y: { min: 0, max: 100, ticks: { font: { size: 10, family: "'JetBrains Mono', monospace" }, padding: 6, callback: v => v + '%' }, grid: { color: 'rgba(28,29,36,0.05)' } },
+        },
+      },
+      plugins: [recoveryZones],
+    });
+
+    const greenDays = f.rs.filter(v => v >= 67).length;
+    const yellowDays = f.rs.filter(v => v >= 33 && v < 67).length;
+    const redDays = f.rs.filter(v => v != null && v < 33).length;
+    const validRec = f.rs.filter(v => v != null);
+    document.getElementById('recovery-strip').innerHTML = `
+      <div class="s"><div class="s-l">Media</div><div class="s-v">${fmt(mean(f.rs), 1)}<span class="s-u">%</span></div></div>
+      <div class="s"><div class="s-l">Verde ≥67</div><div class="s-v">${greenDays}<span class="s-u">d (${fmt(100*greenDays/Math.max(validRec.length,1),0)}%)</span></div></div>
+      <div class="s"><div class="s-l">Amarillo</div><div class="s-v">${yellowDays}<span class="s-u">d</span></div></div>
+      <div class="s"><div class="s-l">Rojo &lt;33</div><div class="s-v">${redDays}<span class="s-u">d</span></div></div>
+    `;
+
+    lineChart('ch-hrv', f.d, [
+      { label: 'Diario', data: f.hv, borderColor: 'transparent', backgroundColor: 'rgba(31, 58, 95, 0.25)', pointRadius: 1.2, showLine: false, fmtDigits: 1 },
+      { label: '14 días', data: rolling(f.hv, 14), borderColor: C.navy, borderWidth: 1.6, pointRadius: 0, tension: 0.25, fmtDigits: 1 },
+    ], { yTickCallback: v => fmt(v, 0) });
+
+    lineChart('ch-rhr', f.d, [
+      { label: 'Diario', data: f.hr, borderColor: 'transparent', backgroundColor: 'rgba(200, 159, 60, 0.30)', pointRadius: 1.2, showLine: false, fmtDigits: 0 },
+      { label: '14 días', data: rolling(f.hr, 14), borderColor: C.gold, borderWidth: 1.6, pointRadius: 0, tension: 0.25, fmtDigits: 1 },
+    ], { yTickCallback: v => fmt(v, 0) });
+
+    lineChart('ch-asi', f.d, [
+      { label: 'Diario', data: f.as, borderColor: 'transparent', backgroundColor: 'rgba(110, 58, 92, 0.25)', pointRadius: 1.2, showLine: false, fmtDigits: 2 },
+      { label: '14 días', data: rolling(f.as, 14), borderColor: C.plum, borderWidth: 1.8, pointRadius: 0, tension: 0.25, fmtDigits: 2 },
+    ], { yTickCallback: v => fmt(v, 1) });
+  }
+
+  function renderInflammatory(f) {
+    const skinPointColors = f.sd.map(v => v == null ? 'transparent' : (Math.abs(v) > 1 ? C.terracotta : 'rgba(90, 138, 107, 0.55)'));
+    const skinPointRadius = f.sd.map(v => v == null ? 0 : (Math.abs(v) > 1 ? 3.5 : 1.4));
+    lineChart('ch-skintemp', f.d, [
+      {
+        label: 'Δ',
+        data: f.sd,
+        borderColor: 'transparent',
+        backgroundColor: skinPointColors,
+        pointBackgroundColor: skinPointColors,
+        pointBorderColor: skinPointColors,
+        pointRadius: skinPointRadius,
+        showLine: false,
+        fmtDigits: 2,
+      },
+    ], {
+      yScale: { min: -3, max: 3 },
+      yTickCallback: v => (v > 0 ? '+' : '') + fmt(v, 1) + '°',
+    });
+
+    const validDev = f.sd.filter(v => v != null);
+    const highDev = validDev.filter(v => Math.abs(v) > 1).length;
+    document.getElementById('skintemp-strip').innerHTML = `
+      <div class="s"><div class="s-l">Línea base media</div><div class="s-v">${fmt(mean(f.sk), 1)}<span class="s-u">°C</span></div></div>
+      <div class="s"><div class="s-l">|Δ| &gt; 1°C</div><div class="s-v">${highDev}<span class="s-u">d</span></div></div>
+      <div class="s"><div class="s-l">Rango</div><div class="s-v">${fmt(minOf(f.sd), 1)}–${fmt(maxOf(f.sd), 1)}</div></div>
+      <div class="s"><div class="s-l">N</div><div class="s-v">${validDev.length}<span class="s-u">días</span></div></div>
+    `;
+
+    lineChart('ch-spo2-trend', f.d, [
+      { label: 'Diario', data: f.so, borderColor: 'transparent', backgroundColor: 'rgba(31, 58, 95, 0.25)', pointRadius: 1.2, showLine: false, fmtDigits: 1 },
+      { label: '14 días', data: rolling(f.so, 14), borderColor: C.navy, borderWidth: 1.6, pointRadius: 0, tension: 0.25, fmtDigits: 1 },
+    ], { yScale: { min: 90, max: 100 }, yTickCallback: v => v + '%' });
+
+    // Histogram
+    const ctx = document.getElementById('ch-spo2-dist');
+    if (charts['ch-spo2-dist']) charts['ch-spo2-dist'].destroy();
+    const validSpo2 = f.so.filter(v => v != null);
+    const minS = 90, maxS = 100, binSize = 0.5;
+    const nBins = Math.ceil((maxS - minS) / binSize);
+    const binLabels = [], binCounts = new Array(nBins).fill(0);
+    for (let i = 0; i < nBins; i++) {
+      binLabels.push((minS + i * binSize).toFixed(1));
+    }
+    validSpo2.forEach(v => {
+      const idx = Math.min(nBins-1, Math.max(0, Math.floor((v - minS) / binSize)));
+      binCounts[idx]++;
+    });
+    charts['ch-spo2-dist'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: binLabels,
+        datasets: [{ data: binCounts, backgroundColor: C.navy, borderWidth: 0, barPercentage: 0.95, categoryPercentage: 1.0 }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 400 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1d24',
+            titleColor: '#fbf6ec',
+            bodyColor: '#fbf6ec',
+            borderColor: 'transparent',
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              title: (items) => items[0].label + '%',
+              label: (ctx) => ctx.parsed.y + ' noches',
+            },
+          },
+        },
+        scales: {
+          x: { ticks: { autoSkip: true, maxTicksLimit: 6, font: { size: 10, family: "'JetBrains Mono', monospace" }, callback: function(v) { return this.getLabelForValue(v) + '%'; } }, grid: { display: false } },
+          y: { ticks: { font: { size: 10, family: "'JetBrains Mono', monospace" }, padding: 6 }, grid: { color: 'rgba(28,29,36,0.05)' } },
+        },
+      },
+    });
+  }
+
+  function renderSleep(f) {
+    const slHours = f.sl.map(v => v == null ? null : v/60);
+    lineChart('ch-sleep', f.d, [
+      { label: 'Diario', data: slHours, borderColor: 'transparent', backgroundColor: 'rgba(90, 138, 107, 0.30)', pointRadius: 1.4, showLine: false, fmtDigits: 1 },
+      { label: '14 días', data: rolling(slHours, 14), borderColor: C.sageDeep, borderWidth: 2, pointRadius: 0, tension: 0.25, fmtDigits: 2 },
+    ], { yScale: { min: 4, max: 13 }, yTickCallback: v => fmt(v, 0) + 'h' });
+
+    const validSl = slHours.filter(v => v != null);
+    document.getElementById('sleep-strip').innerHTML = `
+      <div class="s"><div class="s-l">Media</div><div class="s-v">${fmt(mean(slHours), 1)}<span class="s-u">hr</span></div></div>
+      <div class="s"><div class="s-l">Mediana</div><div class="s-v">${fmt(median(slHours), 1)}<span class="s-u">hr</span></div></div>
+      <div class="s"><div class="s-l">Menos de 7h</div><div class="s-v">${validSl.filter(v=>v<7).length}<span class="s-u">d</span></div></div>
+      <div class="s"><div class="s-l">≥ 8h</div><div class="s-v">${validSl.filter(v=>v>=8).length}<span class="s-u">d</span></div></div>
+    `;
+
+    lineChart('ch-restorative', f.d, [
+      { label: 'Diario', data: f.rp, borderColor: 'transparent', backgroundColor: 'rgba(31, 58, 95, 0.25)', pointRadius: 1.2, showLine: false, fmtDigits: 0 },
+      { label: '14 días', data: rolling(f.rp, 14), borderColor: C.navy, borderWidth: 1.8, pointRadius: 0, tension: 0.25, fmtDigits: 1 },
+    ], { yScale: { min: 30, max: 70 }, yTickCallback: v => fmt(v, 0) + '%' });
+
+    const weekMap = new Map();
+    for (let i = 0; i < f.d.length; i++) {
+      const wh = f.wh[i];
+      if (wh == null) continue;
+      const d = new Date(f.d[i] + 'T00:00:00Z');
+      const day = d.getUTCDay();
+      const monday = new Date(d);
+      monday.setUTCDate(d.getUTCDate() - ((day + 6) % 7));
+      const key = monday.toISOString().slice(0, 10);
+      if (!weekMap.has(key)) weekMap.set(key, []);
+      weekMap.get(key).push(wh);
+    }
+    const weeks = [...weekMap.keys()].sort();
+    const sds = weeks.map(k => {
+      const arr = weekMap.get(k);
+      if (arr.length < 2) return null;
+      const m = arr.reduce((a,b)=>a+b,0)/arr.length;
+      return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/(arr.length-1));
+    });
+
+    const ctx = document.getElementById('ch-regularity');
+    if (charts['ch-regularity']) charts['ch-regularity'].destroy();
+    charts['ch-regularity'] = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: weeks,
+        datasets: [{ data: sds, backgroundColor: C.gold, borderWidth: 0 }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 400 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1c1d24',
+            titleColor: '#fbf6ec',
+            bodyColor: '#fbf6ec',
+            borderColor: 'transparent',
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              title: (items) => 'Semana del ' + fmtDate(items[0].label),
+              label: (ctx) => 'DE: ' + fmt(ctx.parsed.y, 2) + ' hr',
+            },
+          },
+        },
+        scales: {
+          x: { type: 'category', ticks: { autoSkip: true, maxTicksLimit: 8, callback: function(v) { return fmtMonth(this.getLabelForValue(v)); }, font: { size: 10, family: "'JetBrains Mono', monospace" } }, grid: { display: false } },
+          y: { ticks: { font: { size: 10, family: "'JetBrains Mono', monospace" }, padding: 6, callback: v => fmt(v, 1) + 'h' }, grid: { color: 'rgba(28,29,36,0.05)' } },
+        },
+      },
+    });
+  }
+
+  function renderTable(f) {
+    const slHours = f.sl.map(v => v == null ? null : v/60);
+    const rows = [
+      ['Métrica', 'Media', 'Mediana', 'Rango', 'N'],
+      ['Puntaje de recuperación (%)', fmt(mean(f.rs),1), fmt(median(f.rs),0), fmt(minOf(f.rs),0)+'–'+fmt(maxOf(f.rs),0), f.rs.filter(x=>x!=null).length],
+      ['VFC RMSSD (ms)', fmt(mean(f.hv),1), fmt(median(f.hv),1), fmt(minOf(f.hv),1)+'–'+fmt(maxOf(f.hv),1), f.hv.filter(x=>x!=null).length],
+      ['FC en reposo (lpm)', fmt(mean(f.hr),1), fmt(median(f.hr),0), fmt(minOf(f.hr),0)+'–'+fmt(maxOf(f.hr),0), f.hr.filter(x=>x!=null).length],
+      ['Índice de Estrés Autonómico', fmt(mean(f.as),2), fmt(median(f.as),2), fmt(minOf(f.as),2)+'–'+fmt(maxOf(f.as),2), f.as.filter(x=>x!=null).length],
+      ['SpO₂ (%)', fmt(mean(f.so),1), fmt(median(f.so),1), fmt(minOf(f.so),1)+'–'+fmt(maxOf(f.so),1), f.so.filter(x=>x!=null).length],
+      ['Temperatura cutánea (°C)', fmt(mean(f.sk),1), fmt(median(f.sk),1), fmt(minOf(f.sk),1)+'–'+fmt(maxOf(f.sk),1), f.sk.filter(x=>x!=null).length],
+      ['Temp. cutánea |Δ| > 1°C', f.sd.filter(v => v != null && Math.abs(v) > 1).length + ' días', '—', '—', f.sd.filter(x=>x!=null).length],
+      ['Duración del sueño (hr)', fmt(mean(slHours),2), fmt(median(slHours),2), fmt(minOf(slHours),1)+'–'+fmt(maxOf(slHours),1), slHours.filter(x=>x!=null).length],
+      ['Eficiencia del sueño (%)', fmt(mean(f.se),1), fmt(median(f.se),1), fmt(minOf(f.se),0)+'–'+fmt(maxOf(f.se),0), f.se.filter(x=>x!=null).length],
+      ['Sueño reparador (%)', fmt(mean(f.rp),1), fmt(median(f.rp),1), fmt(minOf(f.rp),0)+'–'+fmt(maxOf(f.rp),0), f.rp.filter(x=>x!=null).length],
+      ['Sueño de ondas lentas (min)', fmt(mean(f.sw),0), fmt(median(f.sw),0), fmt(minOf(f.sw),0)+'–'+fmt(maxOf(f.sw),0), f.sw.filter(x=>x!=null).length],
+      ['Sueño REM (min)', fmt(mean(f.sr),0), fmt(median(f.sr),0), fmt(minOf(f.sr),0)+'–'+fmt(maxOf(f.sr),0), f.sr.filter(x=>x!=null).length],
+    ];
+
+    let html = '<table style="width:100%; border-collapse:collapse; font-size:13px;">';
+    html += '<thead><tr style="border-bottom:1px solid #1c1d24;">';
+    rows[0].forEach((c, i) => {
+      const align = i === 0 ? 'left' : 'right';
+      html += `<th style="text-align:${align}; padding:10px 14px 10px 0; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted-2); font-weight:500;">${c}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    for (let i = 1; i < rows.length; i++) {
+      html += '<tr style="border-bottom:1px solid var(--line-soft);">';
+      rows[i].forEach((c, j) => {
+        const align = j === 0 ? 'left' : 'right';
+        const family = j === 0 ? 'inherit' : "'JetBrains Mono', monospace";
+        const color = j === 0 ? 'var(--ink)' : 'var(--ink-soft)';
+        const weight = j === 0 ? '500' : '400';
+        html += `<td style="text-align:${align}; padding:10px 14px 10px 0; font-family:${family}; font-variant-numeric:tabular-nums; color:${color}; font-weight:${weight};">${c}</td>`;
+      });
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    document.getElementById('ref-table').innerHTML = html;
+  }
+
+  function render() {
+    const f = getFiltered();
+    if (f.d.length === 0) return;
+    renderHeader(f);
+    renderKPIs(f);
+    renderAutonomic(f);
+    renderInflammatory(f);
+    renderSleep(f);
+    renderTable(f);
+    document.getElementById('from-date').value = state.fromDate;
+    document.getElementById('to-date').value = state.toDate;
+  }
+
+  function dateMinusDays(dateStr, days) {
+    const dt = new Date(dateStr + 'T00:00:00Z');
+    dt.setUTCDate(dt.getUTCDate() - days);
+    return dt.toISOString().slice(0, 10);
+  }
+
+  function applyPreset(days) {
+    const targetFrom = dateMinusDays(LAST, days - 1);
+    state.fromDate = targetFrom < FIRST ? FIRST : targetFrom;
+    state.toDate = LAST;
+    state.presetRange = days;
+    render();
+  }
+
+  // Wiring
+  document.querySelectorAll('.range-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.range-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPreset(parseInt(btn.dataset.range, 10));
+    });
+  });
+
+  document.getElementById('from-date').addEventListener('change', e => {
+    let v = e.target.value;
+    if (v < FIRST) v = FIRST;
+    if (v > LAST) v = LAST;
+    state.fromDate = v;
+    state.presetRange = null;
+    document.querySelectorAll('.range-pill').forEach(b => b.classList.remove('active'));
+    render();
+  });
+  document.getElementById('to-date').addEventListener('change', e => {
+    let v = e.target.value;
+    if (v < FIRST) v = FIRST;
+    if (v > LAST) v = LAST;
+    state.toDate = v;
+    state.presetRange = null;
+    document.querySelectorAll('.range-pill').forEach(b => b.classList.remove('active'));
+    render();
+  });
+
+  // Set date input bounds
+  document.getElementById('from-date').min = FIRST;
+  document.getElementById('from-date').max = LAST;
+  document.getElementById('to-date').min = FIRST;
+  document.getElementById('to-date').max = LAST;
+
+  document.querySelectorAll('.nav li').forEach(li => {
+    li.addEventListener('click', () => {
+      const tgt = document.getElementById(li.dataset.target);
+      if (tgt) {
+        tgt.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.nav li').forEach(x => x.classList.remove('current'));
+        li.classList.add('current');
+      }
+    });
+  });
+
+  const sections = ['autonomic', 'inflammatory', 'sleep', 'reference'];
+  let scrollTimer = null;
+  window.addEventListener('scroll', () => {
+    if (scrollTimer) cancelAnimationFrame(scrollTimer);
+    scrollTimer = requestAnimationFrame(() => {
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
+        if (el && el.getBoundingClientRect().top < 100) {
+          document.querySelectorAll('.nav li').forEach(x => x.classList.remove('current'));
+          const navLi = document.querySelector(`.nav li[data-target="${sections[i]}"]`);
+          if (navLi) navLi.classList.add('current');
+          break;
+        }
+      }
+    });
+  });
+
+  // Initial render with 365-day preset
+  applyPreset(365);
+})();
+</script>
+</body>
+</html>
